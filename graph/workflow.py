@@ -5,8 +5,8 @@ from __future__ import annotations
 import functools
 from typing import Literal
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, HumanMessage
-from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
 
 from graph.state import AgentState
@@ -16,7 +16,8 @@ from agents.activity_agent import create_activity_agent
 from agents.weather_agent import create_weather_agent
 from agents.budget_agent import create_budget_agent
 from agents.itinerary_agent import create_itinerary_agent, ITINERARY_SYSTEM_PROMPT
-from config.settings import LLM_MODEL, LLM_TEMPERATURE, SUPERVISOR_RECURSION_LIMIT
+from config.llm_factory import create_llm
+from config.settings import SUPERVISOR_RECURSION_LIMIT
 
 
 def _build_agent_input(state: AgentState, agent_type: str) -> str:
@@ -105,7 +106,7 @@ def run_agent_node(state: AgentState, agent_type: str, agent_executor) -> dict:
 
 def compile_itinerary_node(state: AgentState) -> dict:
     """Compile all agent results into a final itinerary."""
-    llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE)
+    llm = create_llm()
     req = state["travel_request"]
 
     # Gather all agent outputs
@@ -161,10 +162,10 @@ def should_continue(state: AgentState) -> str:
     return "end"
 
 
-def create_travel_workflow(llm: ChatOpenAI | None = None) -> StateGraph:
+def create_travel_workflow(llm: BaseChatModel | None = None) -> StateGraph:
     """Create the full multi-agent travel planning workflow."""
     if llm is None:
-        llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE)
+        llm = create_llm()
 
     # Create all agent executors
     flight_agent = create_flight_agent(llm)

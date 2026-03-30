@@ -1,8 +1,8 @@
 """Supervisor agent that orchestrates all specialist agents."""
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-from config.settings import LLM_MODEL, LLM_TEMPERATURE
+from config.llm_factory import create_llm
 
 
 SUPERVISOR_SYSTEM_PROMPT = """You are the Supervisor Agent for VoyageAI, a multi-agent travel planning system.
@@ -31,9 +31,9 @@ Execution order:
 Always respond with which agent to call next and what to ask it."""
 
 
-def create_supervisor(llm: ChatOpenAI | None = None):
+def create_supervisor(llm: BaseChatModel | None = None):
     """Create the supervisor agent."""
     if llm is None:
-        llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE)
+        llm = create_llm()
 
     return llm, SUPERVISOR_SYSTEM_PROMPT

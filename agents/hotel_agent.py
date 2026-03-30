@@ -1,10 +1,10 @@
 """Hotel search specialist agent."""
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from tools.hotel_tools import search_hotels, compare_hotel_prices
-from config.settings import LLM_MODEL, LLM_TEMPERATURE
+from config.llm_factory import create_llm
 
 
 HOTEL_SYSTEM_PROMPT = """You are the Hotel Search Agent for VoyageAI, a multi-agent travel planning system.
@@ -20,10 +20,10 @@ Always present options for budget, mid-range, and luxury tiers when available.
 Highlight key amenities and location advantages."""
 
 
-def create_hotel_agent(llm: ChatOpenAI | None = None):
+def create_hotel_agent(llm: BaseChatModel | None = None):
     """Create the hotel search agent."""
     if llm is None:
-        llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE)
+        llm = create_llm()
 
     tools = [search_hotels, compare_hotel_prices]
 
@@ -33,5 +33,5 @@ def create_hotel_agent(llm: ChatOpenAI | None = None):
         ("placeholder", "{agent_scratchpad}"),
     ])
 
-    agent = create_openai_tools_agent(llm, tools, prompt)
+    agent = create_tool_calling_agent(llm, tools, prompt)
     return AgentExecutor(agent=agent, tools=tools, verbose=True, max_iterations=3)

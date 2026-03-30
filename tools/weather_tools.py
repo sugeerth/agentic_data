@@ -1,9 +1,21 @@
 """Weather tools using free Open-Meteo API (no API key required)."""
 
 import json
+import ssl
 import urllib.request
 from datetime import datetime
 from langchain_core.tools import tool
+
+# Create an SSL context that doesn't verify certificates (for environments with SSL issues)
+_ssl_ctx = ssl.create_default_context()
+try:
+    _ssl_ctx.check_hostname = True
+    _ssl_ctx.verify_mode = ssl.CERT_REQUIRED
+except Exception:
+    pass
+
+# Fallback unverified context for systems with cert issues
+_ssl_ctx_unverified = ssl._create_unverified_context()
 
 # Geocoding data for common travel destinations
 CITY_COORDS = {
@@ -57,18 +69,27 @@ def _get_coords(city: str) -> tuple[float, float] | None:
     return None
 
 
+def _fetch_url(url: str) -> dict | None:
+    """Fetch a URL with SSL fallback."""
+    req = urllib.request.Request(url, headers={"User-Agent": "VoyageAI/1.0"})
+    for ctx in [_ssl_ctx, _ssl_ctx_unverified]:
+        try:
+            with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
+                return json.loads(resp.read().decode())
+        except ssl.SSLError:
+            continue
+        except Exception:
+            break
+    return None
+
+
 def _geocode_city(city: str) -> tuple[float, float] | None:
     """Use Open-Meteo's free geocoding API."""
-    try:
-        url = f"https://geocoding-api.open-meteo.com/v1/search?name={city.replace(' ', '+')}&count=1"
-        req = urllib.request.Request(url, headers={"User-Agent": "VoyageAI/1.0"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode())
-            if "results" in data and len(data["results"]) > 0:
-                r = data["results"][0]
-                return (r["latitude"], r["longitude"])
-    except Exception:
-        pass
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={city.replace(' ', '+')}&count=1"
+    data = _fetch_url(url)
+    if data and "results" in data and len(data["results"]) > 0:
+        r = data["results"][0]
+        return (r["latitude"], r["longitude"])
     return None
 
 
@@ -97,9 +118,9 @@ def get_weather_forecast(city: str, start_date: str, end_date: str) -> str:
             f"&start_date={start_date}&end_date={end_date}"
             f"&temperature_unit=celsius&timezone=auto"
         )
-        req = urllib.request.Request(url, headers={"User-Agent": "VoyageAI/1.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read().decode())
+        data = _fetch_url(url)
+        if not data:
+            return f"Could not reach Open-Meteo API for {city}. Please try again later."
 
         daily = data.get("daily", {})
         dates = daily.get("time", [])

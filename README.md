@@ -68,7 +68,10 @@ VoyageAI uses a **supervisor-worker** multi-agent architecture where specialized
 ### Prerequisites
 
 - Python 3.10+
-- An OpenAI API key (or any LangChain-compatible LLM)
+- A free LLM API key (choose one):
+  - **Groq** (recommended, free): Get key at [console.groq.com](https://console.groq.com)
+  - **Google Gemini** (free): Get key at [aistudio.google.com](https://aistudio.google.com)
+  - **OpenAI** (paid): Get key at [platform.openai.com](https://platform.openai.com)
 
 ### Installation
 
@@ -102,10 +105,38 @@ python3 main.py --destination "Tokyo" --dates "2025-04-01 to 2025-04-07" --budge
 ### Environment Variables
 
 ```env
-OPENAI_API_KEY=your_openai_key          # Required: LLM provider
-LANGFUSE_PUBLIC_KEY=your_public_key     # Optional: Observability
-LANGFUSE_SECRET_KEY=your_secret_key     # Optional: Observability
-LANGFUSE_HOST=https://cloud.langfuse.com
+# Use Groq (FREE) - recommended
+LLM_PROVIDER=groq
+GROQ_API_KEY=your_groq_key              # Free at console.groq.com
+
+# Or use Google Gemini (FREE)
+# LLM_PROVIDER=google
+# GOOGLE_API_KEY=your_google_key        # Free at aistudio.google.com
+
+# Or use OpenAI (paid)
+# LLM_PROVIDER=openai
+# OPENAI_API_KEY=your_openai_key
+
+# Optional: Observability
+# LANGFUSE_PUBLIC_KEY=your_public_key
+# LANGFUSE_SECRET_KEY=your_secret_key
+```
+
+### Run Evaluation
+
+```bash
+# Test all agent tools across 5 destinations (no LLM needed)
+python3 -m evaluation.evaluator
+
+# Results: 92.6/100 overall score, 55 tool calls, 5 destinations
+```
+
+### Agent Internals Visualizer
+
+```bash
+# Launch the multi-page Streamlit app with agent visualization
+streamlit run app.py
+# Navigate to "Agent Visualizer" in the sidebar
 ```
 
 ## Demo
@@ -129,13 +160,32 @@ Itinerary Agent: Compiled 5-day plan with indoor activities on rainy Day 3
 Your complete itinerary is ready!
 ```
 
+## Evaluation Results
+
+All agent tools are evaluated across 5 destinations with automated quality checks:
+
+```
+Overall Score: 92.6/100 | 55 tool calls | 5 destinations tested
+
+Flight Agent:   100/100  (search_flights, compare_flight_prices)
+Hotel Agent:    100/100  (search_hotels, compare_hotel_prices)
+Activity Agent:  98/100  (search_activities, get_restaurant_recommendations)
+Budget Agent:   100/100  (calculate_trip_budget, optimize_budget, get_currency_info)
+Weather Agent:   65/100  (get_weather_forecast, get_best_travel_months)
+                          ^ Lower score due to SSL on test machine; 100/100 with working HTTPS
+```
+
+Run `python3 -m evaluation.evaluator` to reproduce. View detailed results at the [Internals & Eval page](https://sugeerth.github.io/agentic_data/visualizer.html).
+
 ## Tech Stack
 
 - **[LangGraph](https://langchain-ai.github.io/langgraph/)** - Multi-agent orchestration with state machines
 - **[LangChain](https://langchain.com/)** - LLM tooling and agent framework
 - **[Langfuse](https://langfuse.com/)** - Observability and tracing
 - **[Streamlit](https://streamlit.io/)** - Interactive web UI
-- **[OpenAI GPT-4](https://openai.com/)** - Language model backbone (swappable)
+- **[Groq](https://groq.com/)** - Free LLM inference (default, blazing fast)
+- **[Google Gemini](https://aistudio.google.com/)** - Free alternative LLM
+- **[Open-Meteo](https://open-meteo.com/)** - Free weather API (no key needed)
 
 ## Project Structure
 
@@ -166,10 +216,17 @@ agentic_data/
 │   ├── state.py            # Shared state definition
 │   └── workflow.py         # LangGraph workflow
 ├── config/
-│   └── settings.py         # Configuration
+│   ├── settings.py         # Configuration
+│   ├── llm_factory.py      # Multi-provider LLM factory (Groq/Google/OpenAI)
+│   └── langfuse_config.py  # Observability integration
+├── evaluation/
+│   ├── evaluator.py        # Agent evaluation framework
+│   └── eval_results.json   # Latest evaluation results
+├── pages/
+│   └── agent_visualizer.py # Streamlit agent internals page
 ├── docs/                   # GitHub Pages
-│   ├── index.html
-│   └── assets/
+│   ├── index.html          # Main showcase
+│   └── visualizer.html     # Agent internals & eval visualization
 └── tests/
     └── test_agents.py
 ```

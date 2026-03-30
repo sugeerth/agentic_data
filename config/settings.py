@@ -5,10 +5,31 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# LLM Configuration
+# LLM Provider: "groq" (free), "openai", or "google" (free)
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")
+
+# Groq Configuration (FREE - get key at console.groq.com)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+# OpenAI Configuration (paid)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+# Google Gemini Configuration (FREE - get key at aistudio.google.com)
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+GOOGLE_MODEL = os.getenv("GOOGLE_MODEL", "gemini-2.0-flash")
+
+# Resolved LLM settings
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.7"))
+
+# Pick the active model name for display
+if LLM_PROVIDER == "groq":
+    LLM_MODEL = GROQ_MODEL
+elif LLM_PROVIDER == "google":
+    LLM_MODEL = GOOGLE_MODEL
+else:
+    LLM_MODEL = OPENAI_MODEL
 
 # Langfuse Configuration
 LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY", "")

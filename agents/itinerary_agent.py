@@ -1,8 +1,8 @@
 """Itinerary compilation specialist agent."""
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-from config.settings import LLM_MODEL, LLM_TEMPERATURE
+from config.llm_factory import create_llm
 
 
 ITINERARY_SYSTEM_PROMPT = """You are the Itinerary Agent for VoyageAI, a multi-agent travel planning system.
@@ -25,9 +25,9 @@ Format the itinerary beautifully with clear sections, emojis for quick scanning,
 Make it feel like a premium travel plan."""
 
 
-def create_itinerary_agent(llm: ChatOpenAI | None = None):
+def create_itinerary_agent(llm: BaseChatModel | None = None):
     """Create the itinerary compilation agent."""
     if llm is None:
-        llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE)
+        llm = create_llm()
 
     return llm, ITINERARY_SYSTEM_PROMPT

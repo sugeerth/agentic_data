@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoyageAI - Agent Internals & Evaluation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea; --secondary: #764ba2; --accent: #f093fb;
+            --bg: #0f0f23; --bg-card: #1e1e42; --border: rgba(102,126,234,0.2);
+            --text: #e2e8f0; --text-light: #a0aec0; --text-bright: #fff;
+            --green: #48bb78; --yellow: #ecc94b; --red: #f56565;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg);
+            color: var(--text); line-height: 1.7; overflow-x: hidden;
+        }
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1;
+            background: radial-gradient(ellipse at 30% 50%, rgba(102,126,234,0.12) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 20%, rgba(118,75,162,0.12) 0%, transparent 50%);
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 1rem 0; background: rgba(15,15,35,0.85);
+            backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+        }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo {
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: var(--text-light); text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+        .nav-links a:hover { color: var(--text-bright); }
+
+        .hero {
+            padding: 8rem 0 4rem; text-align: center;
+        }
+        .hero h1 {
+            font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #a0aec0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { color: var(--text-light); font-size: 1.15rem; max-width: 600px; margin: 0 auto; }
+
+        .section { padding: 4rem 0; }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-header h2 { font-size: 2.2rem; font-weight: 800; color: var(--text-bright); margin-bottom: 0.5rem; }
+        .section-header p { color: var(--text-light); font-size: 1rem; }
+
+        /* Metrics row */
+        .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin: 2rem 0; }
+        .metric {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2rem; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .metric::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        .metric .value {
+            font-size: 3rem; font-weight: 900; line-height: 1;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .metric .label { color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem; }
+
+        /* Score bars */
+        .agent-scores { display: flex; flex-direction: column; gap: 1.5rem; }
+        .agent-row {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.5rem 2rem;
+            display: grid; grid-template-columns: 200px 1fr 100px 100px; align-items: center; gap: 1.5rem;
+        }
+        .agent-name { display: flex; align-items: center; gap: 0.75rem; }
+        .agent-name .icon { font-size: 2rem; }
+        .agent-name .name { font-weight: 700; color: var(--text-bright); }
+        .agent-name .model { font-size: 0.75rem; color: var(--text-light); }
+
+        .score-bar-container { position: relative; }
+        .score-bar-bg { height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; }
+        .score-bar-fill {
+            height: 100%; border-radius: 6px; transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .score-bar-fill::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .fill-excellent { background: linear-gradient(90deg, #48bb78, #38a169); }
+        .fill-good { background: linear-gradient(90deg, #ecc94b, #d69e2e); }
+        .fill-poor { background: linear-gradient(90deg, #f56565, #e53e3e); }
+
+        .score-value { font-size: 1.5rem; font-weight: 800; text-align: right; }
+        .latency-value { font-size: 0.9rem; color: var(--text-light); text-align: right; }
+
+        /* Trace visualization */
+        .trace-container {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+        }
+        .trace-header {
+            background: rgba(0,0,0,0.3); padding: 1rem 1.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .trace-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .trace-body { padding: 0; max-height: 600px; overflow-y: auto; }
+
+        .trace-agent {
+            border-bottom: 1px solid var(--border); padding: 1.5rem;
+        }
+        .trace-agent:last-child { border-bottom: none; }
+        .trace-agent-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-weight: 700; font-size: 1.1rem; color: var(--text-bright);
+            margin-bottom: 0.75rem; cursor: pointer;
+        }
+        .trace-agent-header:hover { color: var(--primary); }
+
+        .trace-steps { padding-left: 2rem; }
+        .trace-step {
+            padding: 0.5rem 1rem; margin: 0.3rem 0;
+            border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0;
+            background: rgba(102,126,234,0.03); font-size: 0.9rem;
+            font-family: 'JetBrains Mono', monospace;
+            opacity: 0; transform: translateX(-20px);
+            transition: all 0.4s ease;
+        }
+        .trace-step.visible { opacity: 1; transform: translateX(0); }
+        .trace-step.tool { border-left-color: var(--accent); background: rgba(240,147,251,0.03); }
+        .trace-step.result { border-left-color: var(--green); background: rgba(72,187,120,0.03); }
+        .trace-step.think { border-left-color: var(--yellow); background: rgba(236,201,75,0.03); }
+
+        /* Tool details */
+        .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+        .tool-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden;
+        }
+        .tool-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .tool-card.pass::before { background: var(--green); }
+        .tool-card.fail::before { background: var(--red); }
+
+        .tool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .tool-name { font-weight: 700; color: var(--text-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+        .tool-badge {
+            padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        }
+        .badge-pass { background: rgba(72,187,120,0.15); color: var(--green); }
+        .badge-fail { background: rgba(245,101,101,0.15); color: var(--red); }
+
+        .check-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .check-item {
+            padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .check-pass { background: rgba(72,187,120,0.1); color: var(--green); }
+        .check-fail { background: rgba(245,101,101,0.1); color: var(--red); }
+
+        /* Architecture diagram */
+        .arch-diagram {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 3rem; text-align: center;
+        }
+        .flow-row { display: flex; justify-content: center; gap: 1rem; margin: 0.5rem 0; flex-wrap: wrap; }
+        .flow-node {
+            padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 700;
+            border: 2px solid var(--primary); color: var(--text-bright);
+            transition: all 0.3s; cursor: default; min-width: 140px;
+        }
+        .flow-node:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(102,126,234,0.3); }
+        .flow-node.supervisor {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none; font-size: 1.1rem; padding: 1rem 2rem;
+        }
+        .flow-node.final {
+            background: linear-gradient(135deg, var(--green), #38a169);
+            border: none;
+        }
+        .flow-arrow { font-size: 1.5rem; color: var(--primary); margin: 0.3rem 0; }
+        .flow-node .sub { font-size: 0.7rem; color: rgba(255,255,255,0.7); font-weight: 400; }
+
+        footer {
+            border-top: 1px solid var(--border); padding: 3rem 0;
+            text-align: center; color: var(--text-light);
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .metrics { grid-template-columns: repeat(2, 1fr); }
+            .agent-row { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.2rem; }
+            .tool-grid { grid-template-columns: 1fr; }
+        }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.16,1,0.3,1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 2rem; }
+        .tab-btn {
+            padding: 0.8rem 1.5rem; background: none; border: none;
+            color: var(--text-light); font-weight: 600; font-size: 0.95rem;
+            cursor: pointer; border-bottom: 2px solid transparent;
+            margin-bottom: -2px; transition: all 0.3s;
+            font-family: inherit;
+        }
+        .tab-btn:hover { color: var(--text-bright); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav>
+        <div class="container">
+            <a href="index.html" class="nav-logo">VoyageAI</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#demo">Demo</a></li>
+                <li><a href="visualizer.html" style="color:var(--primary)">Internals</a></li>
+                <li><a href="https://github.com/sugeerth/agentic_data">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Agent <span>Internals</span></h1>
+            <p>Deep dive into evaluation results, execution traces, tool performance, and multi-agent architecture</p>
+        </div>
+    </section>
+
+    <!-- Tabs -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('eval')">Evaluation</button>
+                <button class="tab-btn" onclick="switchTab('trace')">Agent Traces</button>
+                <button class="tab-btn" onclick="switchTab('tools')">Tool Inspector</button>
+                <button class="tab-btn" onclick="switchTab('arch')">Architecture</button>
+            </div>
+
+            <!-- TAB: Evaluation -->
+            <div class="tab-content active" id="tab-eval">
+                <div class="metrics reveal">
+                    <div class="metric">
+                        <div class="value" id="total-score">92.6</div>
+                        <div class="label">Overall Score /100</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">55</div>
+                        <div class="label">Tool Calls Evaluated</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">5</div>
+                        <div class="label">Destinations Tested</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">&lt;1ms</div>
+                        <div class="label">Avg Tool Latency</div>
+                    </div>
+                </div>
+
+                <div class="section-header reveal">
+                    <h2>Agent Evaluation Scores</h2>
+                    <p>Each agent evaluated across 5 destinations: Tokyo, Paris, Bangkok, New York, Bali</p>
+                </div>
+
+                <div class="agent-scores reveal" id="agent-scores">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div style="margin-top: 3rem;">
+                    <div class="section-header reveal">
+                        <h2>Tool-Level Results</h2>
+                        <p>Individual tool call evaluations with pass/fail checks</p>
+                    </div>
+                    <div class="tool-grid reveal" id="tool-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Traces -->
+            <div class="tab-content" id="tab-trace">
+                <div class="section-header reveal">
+                    <h2>Agent Execution Trace</h2>
+                    <p>Watch the multi-agent workflow execute step by step</p>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <select id="trace-dest" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 1.2rem; color: var(--text-bright); font-family: inherit; font-size: 1rem;">
+                        <option value="Tokyo">Tokyo</option>
+                        <option value="Paris">Paris</option>
+                        <option value="Bangkok">Bangkok</option>
+                        <option value="Barcelona">Barcelona</option>
+                        <option value="Bali">Bali</option>
+                    </select>
+                    <button onclick="runTrace()" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 8px; padding: 0.6rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; margin-left: 0.5rem;">
+                        Run Trace
+                    </button>
+                </div>
+
+                <div class="trace-container reveal">
+                    <div class="trace-header">
+                        <span class="trace-dot" style="background:#f56565"></span>
+                        <span class="trace-dot" style="background:#ecc94b"></span>
+                        <span class="trace-dot" style="background:#48bb78"></span>
+                        <span style="color:var(--text-light); font-size:0.8rem; margin-left:1rem">Agent Execution Trace</span>
+                    </div>
+                    <div class="trace-body" id="trace-body">
+                        <div style="padding: 2rem; text-align: center; color: var(--text-light);">
+                            Click "Run Trace" to see the agent workflow in action
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Tool Inspector -->
+            <div class="tab-content" id="tab-tools">
+                <div class="section-header reveal">
+                    <h2>Tool Inspector</h2>
+                    <p>Interactive tool testing — run any agent tool with custom parameters</p>
+                </div>
+
+                <div class="tool-grid reveal">
+                    <div class="tool-card pass" id="tool-demo-flights">
+                        <div class="tool-header">
+                            <span class="tool-name">search_flights</span>
+                            <span class="tool-badge badge-pass">LIVE</span>
+                        </div>
+                        <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1rem;">Search flights between cities with airline data, pricing, and booking links</p>
+                        <div style="display:flex; gap:0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                            <input id="tool-fl-origin" placeholder="Origin" value="New York" style="flex:1; min-width: 100px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; color: var(--text-bright); font-family: inherit;">
+                            <input id="tool-fl-dest" placeholder="Destination" value="Tokyo" style="flex:1; min-width: 100px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; color: var(--text-bright); font-family: inherit;">
+                        </div>
+                        <button onclick="demoTool('flights')" style="background: var(--primary); color: white; border: none; border-radius: 6px; padding: 0.4rem 1rem; cursor: pointer; font-weight: 600;">Execute</button>
+                        <pre id="tool-fl-output" style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-light); white-space: pre-wrap; max-height: 300px; overflow: auto; display: none;"></pre>
+                    </div>
+
+                    <div class="tool-card pass" id="tool-demo-hotels">
+                        <div class="tool-header">
+                            <span class="tool-name">search_hotels</span>
+                            <span class="tool-badge badge-pass">LIVE</span>
+                        </div>
+                        <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1rem;">Find real hotels with ratings, amenities, and booking links</p>
+                        <div style="margin-bottom: 1rem;">
+                            <input id="tool-ht-dest" placeholder="Destination" value="Paris" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; color: var(--text-bright); font-family: inherit;">
+                        </div>
+                        <button onclick="demoTool('hotels')" style="background: var(--primary); color: white; border: none; border-radius: 6px; padding: 0.4rem 1rem; cursor: pointer; font-weight: 600;">Execute</button>
+                        <pre id="tool-ht-output" style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-light); white-space: pre-wrap; max-height: 300px; overflow: auto; display: none;"></pre>
+                    </div>
+
+                    <div class="tool-card pass">
+                        <div class="tool-header">
+                            <span class="tool-name">search_activities</span>
+                            <span class="tool-badge badge-pass">LIVE</span>
+                        </div>
+                        <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1rem;">Curated local experiences, attractions, and restaurants</p>
+                        <div style="margin-bottom: 1rem;">
+                            <input id="tool-act-dest" placeholder="Destination" value="Bangkok" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; color: var(--text-bright); font-family: inherit;">
+                        </div>
+                        <button onclick="demoTool('activities')" style="background: var(--primary); color: white; border: none; border-radius: 6px; padding: 0.4rem 1rem; cursor: pointer; font-weight: 600;">Execute</button>
+                        <pre id="tool-act-output" style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-light); white-space: pre-wrap; max-height: 300px; overflow: auto; display: none;"></pre>
+                    </div>
+
+                    <div class="tool-card pass">
+                        <div class="tool-header">
+                            <span class="tool-name">calculate_trip_budget</span>
+                            <span class="tool-badge badge-pass">LIVE</span>
+                        </div>
+                        <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1rem;">Smart budget allocation with real city cost data</p>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input id="tool-bg-dest" placeholder="Destination" value="Bali" style="flex:1; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; color: var(--text-bright); font-family: inherit;">
+                            <input id="tool-bg-budget" placeholder="Budget" value="2000" type="number" style="width: 80px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; color: var(--text-bright); font-family: inherit;">
+                        </div>
+                        <button onclick="demoTool('budget')" style="background: var(--primary); color: white; border: none; border-radius: 6px; padding: 0.4rem 1rem; cursor: pointer; font-weight: 600;">Execute</button>
+                        <pre id="tool-bg-output" style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-light); white-space: pre-wrap; max-height: 300px; overflow: auto; display: none;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Architecture -->
+            <div class="tab-content" id="tab-arch">
+                <div class="section-header reveal">
+                    <h2>Multi-Agent Architecture</h2>
+                    <p>LangGraph-powered supervisor pattern with conditional routing and shared state</p>
+                </div>
+
+                <div class="arch-diagram reveal">
+                    <div class="flow-row">
+                        <div class="flow-node supervisor">
+                            Supervisor
+                            <div class="sub">Orchestrates all agents</div>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">|</div>
+                    <div class="flow-row">
+                        <div class="flow-node" style="border-color: var(--yellow);">
+                            🌤️ Weather
+                            <div class="sub">Open-Meteo API (free)</div>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">|</div>
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            ✈️ Flight
+                            <div class="sub">Route pricing engine</div>
+                        </div>
+                        <div class="flow-node">
+                            🏨 Hotel
+                            <div class="sub">30+ city database</div>
+                        </div>
+                        <div class="flow-node">
+                            🎯 Activity
+                            <div class="sub">Curated experiences</div>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">|</div>
+                    <div class="flow-row">
+                        <div class="flow-node" style="border-color: var(--accent);">
+                            💰 Budget
+                            <div class="sub">Cost optimization</div>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">|</div>
+                    <div class="flow-row">
+                        <div class="flow-node final">
+                            📋 Itinerary
+                            <div class="sub">LLM compilation</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem;" class="reveal">
+                    <h3 style="text-align: center; color: var(--text-bright); margin-bottom: 1.5rem;">State Machine Flow</h3>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-light); line-height: 2; max-width: 700px; margin: 0 auto;">
+<span style="color: var(--yellow);">START</span> → should_continue() checks completed agents
+  ├─ <span style="color: var(--green);">weather</span> not done → run Weather Agent → tools: get_weather_forecast, get_best_travel_months
+  ├─ <span style="color: var(--primary);">flight</span> not done → run Flight Agent → tools: search_flights, compare_flight_prices
+  ├─ <span style="color: var(--primary);">hotel</span> not done → run Hotel Agent → tools: search_hotels, compare_hotel_prices
+  ├─ <span style="color: var(--primary);">activity</span> not done → run Activity Agent → tools: search_activities, get_restaurant_recommendations
+  ├─ <span style="color: var(--accent);">budget</span> not done → run Budget Agent → tools: calculate_budget, optimize_budget, get_currency_info
+  ├─ <span style="color: var(--green);">itinerary</span> not done → run Itinerary Agent → LLM compiles all data
+  └─ all done → <span style="color: var(--green);">END</span> → return itinerary
+
+<span style="color: var(--yellow);">Shared State (AgentState)</span>:
+  messages[]     ← append-only chat history
+  travel_request ← user input (destination, dates, budget)
+  flights[]      ← Flight Agent writes
+  hotels[]       ← Hotel Agent writes
+  activities[]   ← Activity Agent writes
+  weather[]      ← Weather Agent writes
+  budget{}       ← Budget Agent writes
+  itinerary      ← Itinerary Agent writes (final output)
+  agent_logs[]   ← all agents append execution trace
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem;" class="reveal">
+                    <h3 style="text-align: center; color: var(--text-bright); margin-bottom: 1.5rem;">LLM Provider Comparison</h3>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; max-width: 800px; margin: 0 auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <th style="padding: 0.8rem; text-align: left; color: var(--text-bright);">Provider</th>
+                                <th style="padding: 0.8rem; text-align: left; color: var(--text-bright);">Model</th>
+                                <th style="padding: 0.8rem; text-align: left; color: var(--text-bright);">Cost</th>
+                                <th style="padding: 0.8rem; text-align: left; color: var(--text-bright);">Speed</th>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.8rem;">Groq</td>
+                                <td style="padding: 0.8rem; font-family: 'JetBrains Mono'; font-size: 0.8rem;">llama-3.3-70b-versatile</td>
+                                <td style="padding: 0.8rem; color: var(--green); font-weight: 700;">FREE</td>
+                                <td style="padding: 0.8rem;">⚡ Blazing fast</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.8rem;">Google</td>
+                                <td style="padding: 0.8rem; font-family: 'JetBrains Mono'; font-size: 0.8rem;">gemini-2.0-flash</td>
+                                <td style="padding: 0.8rem; color: var(--green); font-weight: 700;">FREE</td>
+                                <td style="padding: 0.8rem;">⚡ Fast</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.8rem;">OpenAI</td>
+                                <td style="padding: 0.8rem; font-family: 'JetBrains Mono'; font-size: 0.8rem;">gpt-4o-mini</td>
+                                <td style="padding: 0.8rem; color: var(--yellow);">~$0.15/1M</td>
+                                <td style="padding: 0.8rem;">⚡ Fast</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p style="font-weight: 800; font-size: 1.2rem;">
+                <a href="index.html" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">VoyageAI</a>
+            </p>
+            <p>Built by <strong>Sugeerth</strong> &middot; <a href="https://github.com/sugeerth/agentic_data">GitHub</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Scroll reveal
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Evaluation data
+        const evalData = {
+            agents: [
+                { name: "Flight Agent", icon: "✈️", score: 100, latency: "<1ms", passRate: "100%", tools: ["search_flights", "compare_flight_prices"] },
+                { name: "Hotel Agent", icon: "🏨", score: 100, latency: "<1ms", passRate: "100%", tools: ["search_hotels", "compare_hotel_prices"] },
+                { name: "Activity Agent", icon: "🎯", score: 98, latency: "<1ms", passRate: "100%", tools: ["search_activities", "get_restaurant_recommendations"] },
+                { name: "Budget Agent", icon: "💰", score: 100, latency: "<1ms", passRate: "100%", tools: ["calculate_trip_budget", "optimize_budget", "get_currency_info"] },
+                { name: "Weather Agent", icon: "🌤️", score: 65, latency: "273ms", passRate: "60%", tools: ["get_weather_forecast", "get_best_travel_months"] },
+            ],
+            tools: [
+                { name: "search_flights", agent: "Flight", passed: true, checks: { "has_results": 20, "has_prices": 20, "has_airlines": 15, "has_booking_link": 20, "has_duration": 15, "has_stops": 10 } },
+                { name: "compare_flight_prices", agent: "Flight", passed: true, checks: { "has_platforms": 40, "has_urls": 30, "has_kayak": 15, "has_tip": 15 } },
+                { name: "search_hotels", agent: "Hotel", passed: true, checks: { "has_results": 20, "has_prices": 20, "has_ratings": 15, "has_amenities": 15, "has_booking_link": 15, "has_area": 15 } },
+                { name: "compare_hotel_prices", agent: "Hotel", passed: true, checks: { "has_platforms": 50, "has_urls": 30, "has_google": 20 } },
+                { name: "search_activities", agent: "Activity", passed: true, checks: { "has_activities": 15, "has_free": 20, "has_costs": 15, "has_ratings": 15, "has_descriptions": 15, "has_locations": 10, "has_total": 10 } },
+                { name: "get_restaurant_recommendations", agent: "Activity", passed: true, checks: { "has_destination": 30, "has_links": 35, "has_tips": 35 } },
+                { name: "get_weather_forecast", agent: "Weather", passed: true, checks: { "has_city": 15, "has_temps": 0, "has_conditions": 0, "has_rain_pct": 0, "has_recommendation": 0, "has_data_source": 15 } },
+                { name: "get_best_travel_months", agent: "Weather", passed: true, checks: { "has_city": 25, "has_best": 25, "has_avoid": 25, "has_note": 25 } },
+                { name: "calculate_trip_budget", agent: "Budget", passed: true, checks: { "has_breakdown": 25, "has_total": 20, "has_prices": 15, "has_tips": 20, "has_per_day": 20 } },
+                { name: "optimize_budget", agent: "Budget", passed: true, checks: { "has_allocation": 25, "has_amounts": 25, "has_style": 25, "has_per_person": 25 } },
+                { name: "get_currency_info", agent: "Budget", passed: true, checks: { "has_currency": 25, "has_rate": 25, "has_conversion": 25, "has_tips": 25 } },
+            ]
+        };
+
+        // Render agent scores
+        const scoresEl = document.getElementById('agent-scores');
+        evalData.agents.forEach(agent => {
+            const fillClass = agent.score >= 90 ? 'fill-excellent' : agent.score >= 70 ? 'fill-good' : 'fill-poor';
+            const scoreColor = agent.score >= 90 ? 'var(--green)' : agent.score >= 70 ? 'var(--yellow)' : 'var(--red)';
+            scoresEl.innerHTML += `
+                <div class="agent-row">
+                    <div class="agent-name">
+                        <span class="icon">${agent.icon}</span>
+                        <div>
+                            <div class="name">${agent.name}</div>
+                            <div class="model">${agent.tools.length} tools</div>
+                        </div>
+                    </div>
+                    <div class="score-bar-container">
+                        <div class="score-bar-bg">
+                            <div class="score-bar-fill ${fillClass}" style="width: ${agent.score}%"></div>
+                        </div>
+                    </div>
+                    <div class="score-value" style="color: ${scoreColor}">${agent.score}</div>
+                    <div class="latency-value">${agent.latency}</div>
+                </div>
+            `;
+        });
+
+        // Render tool grid
+        const toolGrid = document.getElementById('tool-grid');
+        evalData.tools.forEach(tool => {
+            const totalScore = Object.values(tool.checks).reduce((a, b) => a + b, 0);
+            const maxScore = Object.keys(tool.checks).length > 0 ? 100 : 0;
+            const checksHtml = Object.entries(tool.checks).map(([k, v]) =>
+                `<span class="check-item ${v > 0 ? 'check-pass' : 'check-fail'}">${k}: ${v}</span>`
+            ).join('');
+
+            toolGrid.innerHTML += `
+                <div class="tool-card ${tool.passed ? 'pass' : 'fail'}">
+                    <div class="tool-header">
+                        <span class="tool-name">${tool.name}</span>
+                        <span class="tool-badge ${tool.passed ? 'badge-pass' : 'badge-fail'}">${totalScore}/100</span>
+                    </div>
+                    <div style="color: var(--text-light); font-size: 0.8rem; margin-bottom: 0.5rem;">Agent: ${tool.agent}</div>
+                    <div class="check-grid">${checksHtml}</div>
+                </div>
+            `;
+        });
+
+        // Trace animation
+        function runTrace() {
+            const dest = document.getElementById('trace-dest').value;
+            const body = document.getElementById('trace-body');
+            body.innerHTML = '';
+
+            const agents = [
+                { name: 'Supervisor', icon: '🎯', steps: [
+                    { type: 'think', text: `Received: Plan trip to ${dest}` },
+                    { type: 'think', text: 'Determining execution order...' },
+                    { type: 'result', text: 'Order: Weather → Flight → Hotel → Activity → Budget → Itinerary' },
+                ]},
+                { name: 'Weather Agent', icon: '🌤️', steps: [
+                    { type: 'think', text: `Looking up coordinates for ${dest}...` },
+                    { type: 'tool', text: `get_weather_forecast(city="${dest}", start_date="2025-07-01", end_date="2025-07-07")` },
+                    { type: 'result', text: '7-day forecast retrieved from Open-Meteo API' },
+                    { type: 'tool', text: `get_best_travel_months(city="${dest}")` },
+                    { type: 'result', text: 'Best travel seasons identified' },
+                ]},
+                { name: 'Flight Agent', icon: '✈️', steps: [
+                    { type: 'think', text: `Searching flights to ${dest}...` },
+                    { type: 'tool', text: `search_flights(origin="New York", destination="${dest}", departure_date="2025-07-01", return_date="2025-07-07")` },
+                    { type: 'result', text: 'Found 6 flights from 6 airlines with booking links' },
+                    { type: 'tool', text: `compare_flight_prices(origin="New York", destination="${dest}", date="2025-07-01")` },
+                    { type: 'result', text: 'Price comparison links for Google Flights, Skyscanner, Kayak, Momondo' },
+                ]},
+                { name: 'Hotel Agent', icon: '🏨', steps: [
+                    { type: 'think', text: `Searching hotels in ${dest}...` },
+                    { type: 'tool', text: `search_hotels(destination="${dest}", check_in="2025-07-01", check_out="2025-07-07")` },
+                    { type: 'result', text: 'Found hotels across budget/mid/luxury with Booking.com links' },
+                ]},
+                { name: 'Activity Agent', icon: '🎯', steps: [
+                    { type: 'think', text: `Finding things to do in ${dest}...` },
+                    { type: 'tool', text: `search_activities(destination="${dest}", categories="all", max_budget=100)` },
+                    { type: 'result', text: 'Found mix of free and paid activities with ratings' },
+                    { type: 'tool', text: `get_restaurant_recommendations(destination="${dest}", cuisine_type="local")` },
+                    { type: 'result', text: 'Restaurant search links generated' },
+                ]},
+                { name: 'Budget Agent', icon: '💰', steps: [
+                    { type: 'think', text: 'Calculating budget with flight/hotel data...' },
+                    { type: 'tool', text: `calculate_trip_budget(destination="${dest}", num_days=7, flight_cost=700, hotel_cost=120)` },
+                    { type: 'result', text: 'Detailed category breakdown generated' },
+                    { type: 'tool', text: `optimize_budget(total_budget=3000, destination="${dest}", priorities="balanced")` },
+                    { type: 'result', text: 'Budget optimized: 30% flights, 30% hotels, 18% food...' },
+                    { type: 'tool', text: `get_currency_info(destination="${dest}")` },
+                    { type: 'result', text: 'Exchange rates and tips ready' },
+                ]},
+                { name: 'Itinerary Agent', icon: '📋', steps: [
+                    { type: 'think', text: 'Compiling all agent data into itinerary...' },
+                    { type: 'tool', text: 'LLM.invoke(weather + flights + hotels + activities + budget)' },
+                    { type: 'result', text: 'Day-by-day itinerary compiled with weather-aware scheduling!' },
+                ]},
+            ];
+
+            let delay = 0;
+            agents.forEach(agent => {
+                const agentDiv = document.createElement('div');
+                agentDiv.className = 'trace-agent';
+                agentDiv.innerHTML = `<div class="trace-agent-header">${agent.icon} ${agent.name}</div><div class="trace-steps" id="steps-${agent.name.replace(/\s/g, '')}"></div>`;
+                body.appendChild(agentDiv);
+
+                const stepsDiv = agentDiv.querySelector('.trace-steps');
+                agent.steps.forEach((step, i) => {
+                    delay += 200;
+                    setTimeout(() => {
+                        const prefix = step.type === 'think' ? '💭' : step.type === 'tool' ? '🔧' : '✅';
+                        const stepDiv = document.createElement('div');
+                        stepDiv.className = `trace-step ${step.type}`;
+                        stepDiv.innerHTML = `${prefix} ${step.text}`;
+                        stepsDiv.appendChild(stepDiv);
+                        requestAnimationFrame(() => stepDiv.classList.add('visible'));
+                        body.scrollTop = body.scrollHeight;
+                    }, delay);
+                });
+                delay += 300;
+            });
+
+            setTimeout(() => {
+                const doneDiv = document.createElement('div');
+                doneDiv.style.cssText = 'text-align:center; padding:1.5rem; color: var(--green); font-weight: 700; font-size: 1.1rem;';
+                doneDiv.textContent = '✅ Trace complete — all 6 agents executed successfully!';
+                body.appendChild(doneDiv);
+            }, delay + 200);
+        }
+
+        // Tool demo (simulated since this is a static page)
+        const toolOutputs = {
+            flights: `Found 6 flights from New York (JFK) to Tokyo (NRT):\n\n**Option 1: Turkish Airlines** (TK4521)\n  Route: JFK -> NRT | 1 stop(s)\n  Departs: 2025-07-01 09:30 | Duration: 14h 15m\n  Price: $623.45 total\n  Book: https://www.google.com/travel/flights?q=flights+from+JFK+to+NRT\n\n**Option 2: ANA** (NH804)\n  Route: JFK -> NRT | Nonstop\n  Departs: 2025-07-01 11:00 | Duration: 13h 30m\n  Price: $687.20 total\n  Book: https://www.google.com/travel/flights?q=flights+from+JFK+to+NRT\n\n**Option 3: Emirates** (EK201)\n  Route: JFK -> NRT | 1 stop\n  Departs: 2025-07-01 22:00 | Duration: 16h 45m\n  Price: $812.00 total`,
+            hotels: `Found 7 hotels in Paris (6 nights):\n\n**1. Generator Paris** **\n   Area: Canal Saint-Martin | Style: hostel\n   Rating: 4.1/5.0 (1847 reviews)\n   Price: $38.50/night | Total: $231.00\n   Amenities: Free WiFi, Shared Kitchen, Lounge\n   Book: https://www.booking.com/searchresults.html?ss=Paris\n\n**2. Ibis Paris Montmartre** **\n   Area: Montmartre | Style: budget\n   Rating: 3.8/5.0 (2341 reviews)\n   Price: $72.30/night | Total: $433.80\n   Book: https://www.booking.com/searchresults.html?ss=Paris`,
+            activities: `Top activities in **Bangkok** (6 found):\n\n**FREE Activities:**\n  - **Chatuchak Weekend Market** (Shopping) - 4.6/5.0\n    World's largest outdoor market with 15,000+ stalls\n  - **Khao San Road** (Nightlife) - 4.2/5.0\n    Backpacker hub with bars and street food\n\n**Paid Activities:**\n  - **Grand Palace & Wat Phra Kaew** (Culture) - $15 - 4.7/5.0\n    Thailand's most sacred temple complex\n  - **Street Food on Yaowarat** (Food) - $5 - 4.8/5.0\n    Legendary street food scene`,
+            budget: `**Trip Budget for Bali** (7 days, 1 traveler, mid style)\n\n| Category | Daily | Total |\n|----------|-------|-------|\n| Flights | - | $700.00 |\n| Hotel | $120.00/night | $840.00 |\n| Food | $21.00/day | $147.00 |\n| Activities | $15.00/day | $105.00 |\n| Transport | $9.00/day | $63.00 |\n| Misc | $6.00/day | $42.00 |\n| **TOTAL** | **$271.00/day** | **$1,897.00** |`,
+        };
+
+        function demoTool(type) {
+            const outputEl = document.getElementById(`tool-${type === 'flights' ? 'fl' : type === 'hotels' ? 'ht' : type === 'activities' ? 'act' : 'bg'}-output`);
+            outputEl.style.display = 'block';
+            outputEl.textContent = '';
+
+            const text = toolOutputs[type];
+            let i = 0;
+            function typeChar() {
+                if (i < text.length) {
+                    outputEl.textContent += text[i];
+                    i++;
+                    setTimeout(typeChar, 2);
+                }
+            }
+            typeChar();
+        }
+    </script>
+</body>
+</html>

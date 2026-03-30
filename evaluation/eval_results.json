@@ -1,0 +1,935 @@
+{
+  "timestamp": "2026-03-29T22:49:30.910488",
+  "destination": "Tokyo, Paris, Bangkok, New York, Bali",
+  "total_score": 92.6,
+  "summary": "Evaluated 5 destinations across 5 agent types.\nOverall Score: 92.6/100\nTotal tool calls: 55\nPass rate: 80%\n",
+  "agent_results": [
+    {
+      "agent_name": "Flight Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.42307376861572266,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_flights",
+          "latency_ms": 0.7271766662597656,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_airlines": 15,
+            "has_booking_link": 20,
+            "has_duration": 15,
+            "has_stops": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_flight_prices",
+          "latency_ms": 0.11897087097167969,
+          "scores": {
+            "has_platforms": 40,
+            "has_urls": 30,
+            "has_kayak": 15,
+            "has_tip": 15
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Hotel Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.35393238067626953,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_hotels",
+          "latency_ms": 0.5998611450195312,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_ratings": 15,
+            "has_amenities": 15,
+            "has_booking_link": 15,
+            "has_area": 15
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_hotel_prices",
+          "latency_ms": 0.10800361633300781,
+          "scores": {
+            "has_platforms": 50,
+            "has_urls": 30,
+            "has_google": 20
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Activity Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.09393692016601562,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_activities",
+          "latency_ms": 0.1049041748046875,
+          "scores": {
+            "has_activities": 15,
+            "has_free": 20,
+            "has_costs": 15,
+            "has_ratings": 15,
+            "has_descriptions": 15,
+            "has_locations": 10,
+            "has_total": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_restaurant_recommendations",
+          "latency_ms": 0.08296966552734375,
+          "scores": {
+            "has_destination": 30,
+            "has_links": 35,
+            "has_tips": 35
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Weather Agent",
+      "overall_score": 65.0,
+      "latency_avg_ms": 273.1771469116211,
+      "pass_rate": 50.0,
+      "tool_results": [
+        {
+          "tool_name": "get_weather_forecast",
+          "latency_ms": 545.8641052246094,
+          "scores": {
+            "has_city": 15,
+            "has_temps": 0.0,
+            "has_conditions": 0.0,
+            "has_rain_pct": 0.0,
+            "has_recommendation": 0.0,
+            "has_data_source": 15
+          },
+          "issues": [
+            "FAIL: Should show temperatures",
+            "FAIL: Should describe weather conditions",
+            "FAIL: Should show precipitation probability",
+            "FAIL: Should give recommendations"
+          ],
+          "passed": false
+        },
+        {
+          "tool_name": "get_best_travel_months",
+          "latency_ms": 0.4901885986328125,
+          "scores": {
+            "has_city": 25,
+            "has_best": 25,
+            "has_avoid": 25,
+            "has_note": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Budget Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.19407272338867188,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "calculate_trip_budget",
+          "latency_ms": 0.2281665802001953,
+          "scores": {
+            "has_breakdown": 25,
+            "has_total": 20,
+            "has_prices": 15,
+            "has_tips": 20,
+            "has_per_day": 20
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "optimize_budget",
+          "latency_ms": 0.19693374633789062,
+          "scores": {
+            "has_allocation": 25,
+            "has_amounts": 25,
+            "has_style": 25,
+            "has_per_person": 25
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_currency_info",
+          "latency_ms": 0.1571178436279297,
+          "scores": {
+            "has_currency": 25,
+            "has_rate": 25,
+            "has_conversion": 25,
+            "has_tips": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Flight Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.20635128021240234,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_flights",
+          "latency_ms": 0.26488304138183594,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_airlines": 15,
+            "has_booking_link": 20,
+            "has_duration": 15,
+            "has_stops": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_flight_prices",
+          "latency_ms": 0.14781951904296875,
+          "scores": {
+            "has_platforms": 40,
+            "has_urls": 30,
+            "has_kayak": 15,
+            "has_tip": 15
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Hotel Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.18966197967529297,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_hotels",
+          "latency_ms": 0.2372264862060547,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_ratings": 15,
+            "has_amenities": 15,
+            "has_booking_link": 15,
+            "has_area": 15
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_hotel_prices",
+          "latency_ms": 0.14209747314453125,
+          "scores": {
+            "has_platforms": 50,
+            "has_urls": 30,
+            "has_google": 20
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Activity Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.13506412506103516,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_activities",
+          "latency_ms": 0.14901161193847656,
+          "scores": {
+            "has_activities": 15,
+            "has_free": 20,
+            "has_costs": 15,
+            "has_ratings": 15,
+            "has_descriptions": 15,
+            "has_locations": 10,
+            "has_total": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_restaurant_recommendations",
+          "latency_ms": 0.12111663818359375,
+          "scores": {
+            "has_destination": 30,
+            "has_links": 35,
+            "has_tips": 35
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Weather Agent",
+      "overall_score": 65.0,
+      "latency_avg_ms": 270.9393501281738,
+      "pass_rate": 50.0,
+      "tool_results": [
+        {
+          "tool_name": "get_weather_forecast",
+          "latency_ms": 541.4378643035889,
+          "scores": {
+            "has_city": 15,
+            "has_temps": 0.0,
+            "has_conditions": 0.0,
+            "has_rain_pct": 0.0,
+            "has_recommendation": 0.0,
+            "has_data_source": 15
+          },
+          "issues": [
+            "FAIL: Should show temperatures",
+            "FAIL: Should describe weather conditions",
+            "FAIL: Should show precipitation probability",
+            "FAIL: Should give recommendations"
+          ],
+          "passed": false
+        },
+        {
+          "tool_name": "get_best_travel_months",
+          "latency_ms": 0.44083595275878906,
+          "scores": {
+            "has_city": 25,
+            "has_best": 25,
+            "has_avoid": 25,
+            "has_note": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Budget Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.17484029134114584,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "calculate_trip_budget",
+          "latency_ms": 0.19979476928710938,
+          "scores": {
+            "has_breakdown": 25,
+            "has_total": 20,
+            "has_prices": 15,
+            "has_tips": 20,
+            "has_per_day": 20
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "optimize_budget",
+          "latency_ms": 0.1747608184814453,
+          "scores": {
+            "has_allocation": 25,
+            "has_amounts": 25,
+            "has_style": 25,
+            "has_per_person": 25
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_currency_info",
+          "latency_ms": 0.1499652862548828,
+          "scores": {
+            "has_currency": 25,
+            "has_rate": 25,
+            "has_conversion": 25,
+            "has_tips": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Flight Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.1939535140991211,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_flights",
+          "latency_ms": 0.247955322265625,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_airlines": 15,
+            "has_booking_link": 20,
+            "has_duration": 15,
+            "has_stops": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_flight_prices",
+          "latency_ms": 0.1399517059326172,
+          "scores": {
+            "has_platforms": 40,
+            "has_urls": 30,
+            "has_kayak": 15,
+            "has_tip": 15
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Hotel Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.2460479736328125,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_hotels",
+          "latency_ms": 0.22292137145996094,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_ratings": 15,
+            "has_amenities": 15,
+            "has_booking_link": 15,
+            "has_area": 15
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_hotel_prices",
+          "latency_ms": 0.26917457580566406,
+          "scores": {
+            "has_platforms": 50,
+            "has_urls": 30,
+            "has_google": 20
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Activity Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.1329183578491211,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_activities",
+          "latency_ms": 0.1468658447265625,
+          "scores": {
+            "has_activities": 15,
+            "has_free": 20,
+            "has_costs": 15,
+            "has_ratings": 15,
+            "has_descriptions": 15,
+            "has_locations": 10,
+            "has_total": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_restaurant_recommendations",
+          "latency_ms": 0.11897087097167969,
+          "scores": {
+            "has_destination": 30,
+            "has_links": 35,
+            "has_tips": 35
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Weather Agent",
+      "overall_score": 65.0,
+      "latency_avg_ms": 272.2961902618408,
+      "pass_rate": 50.0,
+      "tool_results": [
+        {
+          "tool_name": "get_weather_forecast",
+          "latency_ms": 544.2230701446533,
+          "scores": {
+            "has_city": 15,
+            "has_temps": 0.0,
+            "has_conditions": 0.0,
+            "has_rain_pct": 0.0,
+            "has_recommendation": 0.0,
+            "has_data_source": 15
+          },
+          "issues": [
+            "FAIL: Should show temperatures",
+            "FAIL: Should describe weather conditions",
+            "FAIL: Should show precipitation probability",
+            "FAIL: Should give recommendations"
+          ],
+          "passed": false
+        },
+        {
+          "tool_name": "get_best_travel_months",
+          "latency_ms": 0.3693103790283203,
+          "scores": {
+            "has_city": 25,
+            "has_best": 25,
+            "has_avoid": 25,
+            "has_note": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Budget Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.12350082397460938,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "calculate_trip_budget",
+          "latency_ms": 0.1609325408935547,
+          "scores": {
+            "has_breakdown": 25,
+            "has_total": 20,
+            "has_prices": 15,
+            "has_tips": 20,
+            "has_per_day": 20
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "optimize_budget",
+          "latency_ms": 0.11682510375976562,
+          "scores": {
+            "has_allocation": 25,
+            "has_amounts": 25,
+            "has_style": 25,
+            "has_per_person": 25
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_currency_info",
+          "latency_ms": 0.09274482727050781,
+          "scores": {
+            "has_currency": 25,
+            "has_rate": 25,
+            "has_conversion": 25,
+            "has_tips": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Flight Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.12564659118652344,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_flights",
+          "latency_ms": 0.15115737915039062,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_airlines": 15,
+            "has_booking_link": 20,
+            "has_duration": 15,
+            "has_stops": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_flight_prices",
+          "latency_ms": 0.10013580322265625,
+          "scores": {
+            "has_platforms": 40,
+            "has_urls": 30,
+            "has_kayak": 15,
+            "has_tip": 15
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Hotel Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.12421607971191406,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_hotels",
+          "latency_ms": 0.15425682067871094,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_ratings": 15,
+            "has_amenities": 15,
+            "has_booking_link": 15,
+            "has_area": 15
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_hotel_prices",
+          "latency_ms": 0.09417533874511719,
+          "scores": {
+            "has_platforms": 50,
+            "has_urls": 30,
+            "has_google": 20
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Activity Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.09691715240478516,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_activities",
+          "latency_ms": 0.1068115234375,
+          "scores": {
+            "has_activities": 15,
+            "has_free": 20,
+            "has_costs": 15,
+            "has_ratings": 15,
+            "has_descriptions": 15,
+            "has_locations": 10,
+            "has_total": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_restaurant_recommendations",
+          "latency_ms": 0.08702278137207031,
+          "scores": {
+            "has_destination": 30,
+            "has_links": 35,
+            "has_tips": 35
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Weather Agent",
+      "overall_score": 65.0,
+      "latency_avg_ms": 272.666335105896,
+      "pass_rate": 50.0,
+      "tool_results": [
+        {
+          "tool_name": "get_weather_forecast",
+          "latency_ms": 544.9159145355225,
+          "scores": {
+            "has_city": 15,
+            "has_temps": 0.0,
+            "has_conditions": 0.0,
+            "has_rain_pct": 0.0,
+            "has_recommendation": 0.0,
+            "has_data_source": 15
+          },
+          "issues": [
+            "FAIL: Should show temperatures",
+            "FAIL: Should describe weather conditions",
+            "FAIL: Should show precipitation probability",
+            "FAIL: Should give recommendations"
+          ],
+          "passed": false
+        },
+        {
+          "tool_name": "get_best_travel_months",
+          "latency_ms": 0.41675567626953125,
+          "scores": {
+            "has_city": 25,
+            "has_best": 25,
+            "has_avoid": 25,
+            "has_note": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Budget Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.15536944071451822,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "calculate_trip_budget",
+          "latency_ms": 0.18596649169921875,
+          "scores": {
+            "has_breakdown": 25,
+            "has_total": 20,
+            "has_prices": 15,
+            "has_tips": 20,
+            "has_per_day": 20
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "optimize_budget",
+          "latency_ms": 0.15115737915039062,
+          "scores": {
+            "has_allocation": 25,
+            "has_amounts": 25,
+            "has_style": 25,
+            "has_per_person": 25
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_currency_info",
+          "latency_ms": 0.1289844512939453,
+          "scores": {
+            "has_currency": 25,
+            "has_rate": 25,
+            "has_conversion": 25,
+            "has_tips": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Flight Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.17750263214111328,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_flights",
+          "latency_ms": 0.21505355834960938,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_airlines": 15,
+            "has_booking_link": 20,
+            "has_duration": 15,
+            "has_stops": 10
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_flight_prices",
+          "latency_ms": 0.1399517059326172,
+          "scores": {
+            "has_platforms": 40,
+            "has_urls": 30,
+            "has_kayak": 15,
+            "has_tip": 15
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Hotel Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.17011165618896484,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_hotels",
+          "latency_ms": 0.20813941955566406,
+          "scores": {
+            "has_results": 20,
+            "has_prices": 20,
+            "has_ratings": 15,
+            "has_amenities": 15,
+            "has_booking_link": 15,
+            "has_area": 15
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "compare_hotel_prices",
+          "latency_ms": 0.13208389282226562,
+          "scores": {
+            "has_platforms": 50,
+            "has_urls": 30,
+            "has_google": 20
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Activity Agent",
+      "overall_score": 90.0,
+      "latency_avg_ms": 0.12791156768798828,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "search_activities",
+          "latency_ms": 0.13589859008789062,
+          "scores": {
+            "has_activities": 15,
+            "has_free": 0.0,
+            "has_costs": 15,
+            "has_ratings": 15,
+            "has_descriptions": 15,
+            "has_locations": 10,
+            "has_total": 10
+          },
+          "issues": [
+            "FAIL: Should include free activities"
+          ],
+          "passed": true
+        },
+        {
+          "tool_name": "get_restaurant_recommendations",
+          "latency_ms": 0.11992454528808594,
+          "scores": {
+            "has_destination": 30,
+            "has_links": 35,
+            "has_tips": 35
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Weather Agent",
+      "overall_score": 65.0,
+      "latency_avg_ms": 272.1196413040161,
+      "pass_rate": 50.0,
+      "tool_results": [
+        {
+          "tool_name": "get_weather_forecast",
+          "latency_ms": 543.9250469207764,
+          "scores": {
+            "has_city": 15,
+            "has_temps": 0.0,
+            "has_conditions": 0.0,
+            "has_rain_pct": 0.0,
+            "has_recommendation": 0.0,
+            "has_data_source": 15
+          },
+          "issues": [
+            "FAIL: Should show temperatures",
+            "FAIL: Should describe weather conditions",
+            "FAIL: Should show precipitation probability",
+            "FAIL: Should give recommendations"
+          ],
+          "passed": false
+        },
+        {
+          "tool_name": "get_best_travel_months",
+          "latency_ms": 0.3142356872558594,
+          "scores": {
+            "has_city": 25,
+            "has_best": 25,
+            "has_avoid": 25,
+            "has_note": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "agent_name": "Budget Agent",
+      "overall_score": 100.0,
+      "latency_avg_ms": 0.10633468627929688,
+      "pass_rate": 100.0,
+      "tool_results": [
+        {
+          "tool_name": "calculate_trip_budget",
+          "latency_ms": 0.12993812561035156,
+          "scores": {
+            "has_breakdown": 25,
+            "has_total": 20,
+            "has_prices": 15,
+            "has_tips": 20,
+            "has_per_day": 20
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "optimize_budget",
+          "latency_ms": 0.10418891906738281,
+          "scores": {
+            "has_allocation": 25,
+            "has_amounts": 25,
+            "has_style": 25,
+            "has_per_person": 25
+          },
+          "issues": [],
+          "passed": true
+        },
+        {
+          "tool_name": "get_currency_info",
+          "latency_ms": 0.08487701416015625,
+          "scores": {
+            "has_currency": 25,
+            "has_rate": 25,
+            "has_conversion": 25,
+            "has_tips": 25
+          },
+          "issues": [],
+          "passed": true
+        }
+      ]
+    }
+  ]
+}
