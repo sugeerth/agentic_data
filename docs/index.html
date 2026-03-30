@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoyageAI - Multi-Agent AI Travel Planner</title>
+    <meta name="description" content="An intelligent multi-agent travel planning system powered by LangGraph, LangChain, and Langfuse. Plan your perfect trip with specialized AI agents.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --bg: #0f0f23;
+            --bg-light: #1a1a3e;
+            --bg-card: #1e1e42;
+            --text: #e2e8f0;
+            --text-light: #a0aec0;
+            --text-bright: #ffffff;
+            --border: rgba(102, 126, 234, 0.2);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(240, 147, 251, 0.08) 0%, transparent 50%);
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 1rem 0;
+            background: rgba(15, 15, 35, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .container {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem; font-weight: 800;
+            background: var(--gradient); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a {
+            color: var(--text-light); text-decoration: none; font-weight: 500;
+            font-size: 0.9rem; transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--text-bright); }
+
+        .nav-cta {
+            background: var(--gradient) !important; color: white !important;
+            padding: 0.5rem 1.2rem; border-radius: 8px;
+            font-weight: 600 !important;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center;
+            padding-top: 5rem;
+            position: relative;
+        }
+
+        .hero-content { text-align: center; width: 100%; }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(102, 126, 234, 0.15); border: 1px solid var(--border);
+            border-radius: 30px; padding: 0.4rem 1.2rem;
+            font-size: 0.85rem; color: var(--primary); font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .hero-badge .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #48bb78; animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900;
+            line-height: 1.1; margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a0aec0 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero h1 span {
+            background: var(--gradient); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem; color: var(--text-light);
+            max-width: 700px; margin: 0 auto 2.5rem;
+        }
+
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.9rem 2rem; border-radius: 12px; font-weight: 600;
+            font-size: 1rem; text-decoration: none; transition: all 0.3s;
+            cursor: pointer; border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient); color: white;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.08); color: var(--text-bright);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+        }
+
+        /* Tech badges */
+        .tech-stack {
+            display: flex; gap: 1.5rem; justify-content: center;
+            margin-top: 3rem; flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Architecture Section */
+        .section { padding: 6rem 0; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-header h2 {
+            font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;
+            color: var(--text-bright);
+        }
+        .section-header p { color: var(--text-light); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+        /* Agent cards */
+        .agents-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .agent-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 2rem;
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .agent-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 40px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+        .agent-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: var(--gradient);
+        }
+
+        .agent-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+        .agent-card h3 { font-size: 1.3rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.5rem; }
+        .agent-card p { color: var(--text-light); font-size: 0.95rem; }
+
+        .agent-tools {
+            display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;
+        }
+        .tool-tag {
+            background: rgba(102, 126, 234, 0.1); border: 1px solid var(--border);
+            padding: 0.2rem 0.6rem; border-radius: 6px;
+            font-size: 0.75rem; color: var(--primary);
+        }
+
+        /* Architecture diagram */
+        .architecture {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 3rem;
+            margin: 3rem auto; max-width: 900px;
+        }
+
+        .arch-flow {
+            display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+        }
+
+        .arch-node {
+            background: rgba(102, 126, 234, 0.15); border: 2px solid var(--primary);
+            border-radius: 12px; padding: 1rem 2.5rem;
+            font-weight: 700; font-size: 1.1rem; color: var(--text-bright);
+            text-align: center;
+        }
+
+        .arch-node.supervisor {
+            background: var(--gradient); color: white; border: none;
+            font-size: 1.2rem; padding: 1.2rem 3rem;
+        }
+
+        .arch-node.final {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white; border: none;
+        }
+
+        .arch-parallel {
+            display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+        }
+
+        .arch-arrow { color: var(--primary); font-size: 1.5rem; }
+
+        /* Features */
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.8rem;
+        }
+
+        .feature-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: rgba(102, 126, 234, 0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-bottom: 1rem;
+        }
+
+        .feature-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.5rem; }
+        .feature-card p { color: var(--text-light); font-size: 0.9rem; }
+
+        /* Demo section */
+        .demo-container {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .demo-header {
+            background: rgba(0,0,0,0.3); padding: 0.8rem 1.2rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .demo-dot.red { background: #f56565; }
+        .demo-dot.yellow { background: #ecc94b; }
+        .demo-dot.green { background: #48bb78; }
+
+        .demo-body { padding: 2rem; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.85rem; }
+        .demo-body .line { margin: 0.3rem 0; animation: fadeIn 0.5s ease-in; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .demo-prompt { color: #48bb78; }
+        .demo-agent { color: var(--primary); font-weight: 600; }
+        .demo-result { color: var(--text-light); }
+        .demo-success { color: #48bb78; font-weight: 600; }
+        .demo-price { color: #ecc94b; }
+        .demo-link { color: #f093fb; }
+
+        /* Interactive Demo */
+        .interactive-demo {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 3rem;
+            margin-top: 3rem; text-align: center;
+        }
+
+        .demo-input-group {
+            display: flex; gap: 1rem; justify-content: center;
+            flex-wrap: wrap; margin: 2rem 0;
+        }
+
+        .demo-input {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: 10px; padding: 0.8rem 1.2rem;
+            color: var(--text-bright); font-family: inherit;
+            font-size: 0.95rem; min-width: 200px;
+        }
+
+        .demo-input:focus { outline: none; border-color: var(--primary); }
+
+        .demo-output {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: 12px; padding: 2rem;
+            text-align: left; margin-top: 1.5rem; min-height: 200px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+            display: none;
+        }
+
+        .demo-output.active { display: block; }
+
+        .agent-step {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 0.8rem; border-radius: 8px; margin: 0.5rem 0;
+            background: rgba(255,255,255,0.03);
+        }
+        .agent-step .icon { font-size: 1.5rem; }
+        .agent-step .name { font-weight: 600; color: var(--primary); min-width: 120px; }
+        .agent-step .status { color: var(--text-light); flex: 1; }
+        .agent-step .check { color: #48bb78; font-size: 1.2rem; }
+
+        /* Code section */
+        .code-block {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            border-radius: 12px; padding: 2rem; margin: 1rem 0;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem; color: var(--text-light);
+            overflow-x: auto; line-height: 1.8;
+        }
+
+        .code-block .keyword { color: #c792ea; }
+        .code-block .string { color: #c3e88d; }
+        .code-block .comment { color: #546e7a; }
+        .code-block .func { color: #82aaff; }
+        .code-block .var { color: #f78c6c; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 0; text-align: center; color: var(--text-light);
+        }
+
+        footer a { color: var(--primary); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .agents-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .arch-parallel { flex-direction: column; align-items: center; }
+            .demo-input-group { flex-direction: column; align-items: center; }
+        }
+
+        /* Scroll animations */
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* Floating particles */
+        .particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: -1; overflow: hidden;
+        }
+
+        .particle {
+            position: absolute; width: 4px; height: 4px; border-radius: 50%;
+            background: rgba(102, 126, 234, 0.3);
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="nav-logo">VoyageAI</div>
+            <ul class="nav-links">
+                <li><a href="#agents">Agents</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="https://github.com/sugeerth/agentic_data" class="nav-cta">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    Multi-Agent System &middot; Open Source
+                </div>
+                <h1>Plan Your Perfect Trip<br>with <span>AI Agents</span></h1>
+                <p>VoyageAI uses 6 specialized AI agents powered by LangGraph to search flights, find hotels,
+                   discover activities, check weather, optimize budgets, and compile beautiful itineraries.</p>
+                <div class="hero-buttons">
+                    <a href="https://github.com/sugeerth/agentic_data" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        View on GitHub
+                    </a>
+                    <a href="#demo" class="btn btn-secondary">
+                        See Live Demo
+                    </a>
+                </div>
+                <div class="tech-stack">
+                    <span class="tech-badge">LangGraph</span>
+                    <span class="tech-badge">LangChain</span>
+                    <span class="tech-badge">Langfuse</span>
+                    <span class="tech-badge">OpenAI GPT-4</span>
+                    <span class="tech-badge">Streamlit</span>
+                    <span class="tech-badge">Open-Meteo API</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agents -->
+    <section class="section" id="agents">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>6 Specialized AI Agents</h2>
+                <p>Each agent is an expert in its domain, using dedicated tools and prompts to deliver the best results.</p>
+            </div>
+            <div class="agents-grid">
+                <div class="agent-card reveal">
+                    <span class="agent-icon">🌤️</span>
+                    <h3>Weather Agent</h3>
+                    <p>Fetches real weather forecasts using the free Open-Meteo API. Provides daily conditions, temperature ranges, and activity recommendations based on weather.</p>
+                    <div class="agent-tools">
+                        <span class="tool-tag">Open-Meteo API</span>
+                        <span class="tool-tag">Geocoding</span>
+                        <span class="tool-tag">Climate Analysis</span>
+                    </div>
+                </div>
+                <div class="agent-card reveal">
+                    <span class="agent-icon">✈️</span>
+                    <h3>Flight Agent</h3>
+                    <p>Searches for optimal flights with realistic pricing based on route distance and airline data. Provides booking links to Google Flights, Skyscanner, and Kayak.</p>
+                    <div class="agent-tools">
+                        <span class="tool-tag">Route Pricing</span>
+                        <span class="tool-tag">Airline Database</span>
+                        <span class="tool-tag">Price Comparison</span>
+                    </div>
+                </div>
+                <div class="agent-card reveal">
+                    <span class="agent-icon">🏨</span>
+                    <h3>Hotel Agent</h3>
+                    <p>Finds real hotels across budget tiers with amenities, ratings, and direct booking links to Booking.com, Expedia, Google Hotels, and more.</p>
+                    <div class="agent-tools">
+                        <span class="tool-tag">Hotel Database</span>
+                        <span class="tool-tag">Price Comparison</span>
+                        <span class="tool-tag">Review Analysis</span>
+                    </div>
+                </div>
+                <div class="agent-card reveal">
+                    <span class="agent-icon">🎯</span>
+                    <h3>Activity Agent</h3>
+                    <p>Discovers curated local experiences, attractions, and restaurant recommendations. Prioritizes authentic experiences with real costs and locations.</p>
+                    <div class="agent-tools">
+                        <span class="tool-tag">Curated Database</span>
+                        <span class="tool-tag">Category Filter</span>
+                        <span class="tool-tag">Restaurant Finder</span>
+                    </div>
+                </div>
+                <div class="agent-card reveal">
+                    <span class="agent-icon">💰</span>
+                    <h3>Budget Agent</h3>
+                    <p>Optimizes budget allocation based on real city cost data. Provides currency information, exchange tips, and smart spending recommendations.</p>
+                    <div class="agent-tools">
+                        <span class="tool-tag">Cost Database</span>
+                        <span class="tool-tag">Budget Optimizer</span>
+                        <span class="tool-tag">Currency Info</span>
+                    </div>
+                </div>
+                <div class="agent-card reveal">
+                    <span class="agent-icon">📋</span>
+                    <h3>Itinerary Agent</h3>
+                    <p>Compiles all agent results into a comprehensive day-by-day travel plan with weather-aware scheduling, booking links, and budget tracking.</p>
+                    <div class="agent-tools">
+                        <span class="tool-tag">Schedule Optimizer</span>
+                        <span class="tool-tag">Conflict Resolution</span>
+                        <span class="tool-tag">PDF Export</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section class="section" id="architecture">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>Multi-Agent Architecture</h2>
+                <p>A LangGraph-powered supervisor pattern with conditional routing and shared state management.</p>
+            </div>
+            <div class="architecture reveal">
+                <div class="arch-flow">
+                    <div class="arch-node supervisor">Supervisor (Orchestrator)</div>
+                    <div class="arch-arrow">&#8595;</div>
+                    <div class="arch-node">Weather Agent (First - informs all others)</div>
+                    <div class="arch-arrow">&#8595;</div>
+                    <div class="arch-parallel">
+                        <div class="arch-node">Flight Agent</div>
+                        <div class="arch-node">Hotel Agent</div>
+                        <div class="arch-node">Activity Agent</div>
+                    </div>
+                    <div class="arch-arrow">&#8595;</div>
+                    <div class="arch-node">Budget Agent (needs flight/hotel prices)</div>
+                    <div class="arch-arrow">&#8595;</div>
+                    <div class="arch-node final">Itinerary Agent (Final Compilation)</div>
+                </div>
+            </div>
+
+            <div class="code-block reveal" style="max-width: 900px; margin: 2rem auto;">
+                <span class="comment"># LangGraph Workflow Definition</span><br>
+                <span class="keyword">from</span> langgraph.graph <span class="keyword">import</span> StateGraph, END<br><br>
+                workflow = StateGraph(<span class="func">AgentState</span>)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"weather"</span>, weather_agent)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"flight"</span>, flight_agent)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"hotel"</span>, hotel_agent)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"activity"</span>, activity_agent)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"budget"</span>, budget_agent)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"itinerary"</span>, itinerary_agent)<br><br>
+                <span class="comment"># Conditional routing based on completed agents</span><br>
+                workflow.<span class="func">add_conditional_edges</span>(<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"__start__"</span>, should_continue,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;{<span class="string">"weather"</span>: <span class="string">"weather"</span>, <span class="string">"flight"</span>: <span class="string">"flight"</span>, ...}<br>
+                )<br>
+                graph = workflow.<span class="func">compile</span>()
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo -->
+    <section class="section" id="demo">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>Live Demo</h2>
+                <p>Watch the multi-agent system plan a trip in real-time.</p>
+            </div>
+
+            <div class="demo-container reveal">
+                <div class="demo-header">
+                    <span class="demo-dot red"></span>
+                    <span class="demo-dot yellow"></span>
+                    <span class="demo-dot green"></span>
+                    <span style="color: var(--text-light); font-size: 0.8rem; margin-left: 1rem;">VoyageAI Terminal</span>
+                </div>
+                <div class="demo-body" id="demo-terminal">
+                    <div class="line"><span class="demo-prompt">$</span> python3 main.py --destination "Tokyo" --budget 3000 --dates "2025-06-01 to 2025-06-07"</div>
+                </div>
+            </div>
+
+            <!-- Interactive Demo -->
+            <div class="interactive-demo reveal">
+                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text-bright);">Try It Yourself</h3>
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">Enter a destination to see the agent workflow in action</p>
+
+                <div class="demo-input-group">
+                    <input type="text" class="demo-input" id="demo-destination" placeholder="Destination (e.g., Paris)" value="Tokyo">
+                    <input type="number" class="demo-input" id="demo-budget" placeholder="Budget ($)" value="3000" style="max-width: 150px;">
+                    <input type="number" class="demo-input" id="demo-days" placeholder="Days" value="7" style="max-width: 100px;">
+                    <button class="btn btn-primary" onclick="runInteractiveDemo()" style="border: none; cursor: pointer;">
+                        Plan Trip
+                    </button>
+                </div>
+
+                <div class="demo-output" id="demo-output">
+                    <div id="agent-steps"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>Why VoyageAI?</h2>
+                <p>Built with the latest AI orchestration frameworks for intelligent, reliable travel planning.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Real Booking Links</h3>
+                    <p>Every flight, hotel, and activity comes with direct links to Google Flights, Booking.com, Skyscanner, and more.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🌡️</div>
+                    <h3>Real Weather Data</h3>
+                    <p>Live weather forecasts from Open-Meteo API (completely free, no API key required) to optimize your daily plans.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🤖</div>
+                    <h3>True Multi-Agent</h3>
+                    <p>Not a single prompt — 6 specialized agents with their own tools, prompts, and reasoning, orchestrated by LangGraph.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">📊</div>
+                    <h3>Langfuse Observability</h3>
+                    <p>Full tracing of every agent interaction, tool call, and decision for debugging and optimization.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">💸</div>
+                    <h3>Smart Budgeting</h3>
+                    <p>Real cost-of-living data for 30+ cities. Budget optimization with priority-based allocation.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Beautiful UI</h3>
+                    <p>Sleek Streamlit interface with real-time agent status tracking and downloadable itineraries.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>30+ Destinations</h3>
+                    <p>Curated activity databases for popular destinations. Works with any city via intelligent fallbacks.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🔓</div>
+                    <h3>100% Open Source</h3>
+                    <p>MIT licensed. Fork it, customize it, deploy it. Bring your own LLM — works with any OpenAI-compatible API.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="section" id="quickstart">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>Get Started in 30 Seconds</h2>
+            </div>
+            <div class="code-block reveal" style="max-width: 700px; margin: 0 auto;">
+                <span class="comment"># Clone and setup</span><br>
+                git clone https://github.com/sugeerth/agentic_data.git<br>
+                cd agentic_data<br>
+                pip install -r requirements.txt<br><br>
+                <span class="comment"># Set your API key</span><br>
+                export OPENAI_API_KEY=your_key_here<br><br>
+                <span class="comment"># Launch the beautiful UI</span><br>
+                streamlit run app.py<br><br>
+                <span class="comment"># Or use the CLI</span><br>
+                python3 main.py -d "Tokyo" -b 3000 --dates "2025-06-01 to 2025-06-07"
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">
+                <span style="background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">VoyageAI</span>
+            </p>
+            <p>Built by <strong>Sugeerth</strong></p>
+            <p style="margin-top: 0.5rem;">
+                <a href="https://github.com/sugeerth/agentic_data">GitHub</a> &middot;
+                Powered by LangGraph + LangChain + Langfuse
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.8rem;">MIT License &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        // Floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (Math.random() * 20 + 10) + 's';
+            p.style.animationDelay = (Math.random() * 20) + 's';
+            p.style.width = p.style.height = (Math.random() * 4 + 2) + 'px';
+            particlesContainer.appendChild(p);
+        }
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Terminal demo animation
+        const demoLines = [
+            { text: '', delay: 800 },
+            { text: '==========================================', delay: 100, class: 'demo-agent' },
+            { text: '  VoyageAI - Multi-Agent AI Travel Planner', delay: 100, class: 'demo-agent' },
+            { text: '==========================================', delay: 100, class: 'demo-agent' },
+            { text: '  Destination:  Tokyo', delay: 100 },
+            { text: '  Dates:        2025-06-01 to 2025-06-07', delay: 100 },
+            { text: '  Budget:       $3,000.00', delay: 100 },
+            { text: '', delay: 500 },
+            { text: 'Starting multi-agent workflow...', delay: 1000, class: 'demo-success' },
+            { text: '', delay: 300 },
+            { text: '🌤️ [WEATHER AGENT] Fetching forecast for Tokyo...', delay: 800, class: 'demo-agent' },
+            { text: '   Jun 1: Partly cloudy, 24°C/18°C, 20% rain', delay: 200, class: 'demo-result' },
+            { text: '   Jun 2: Clear sky, 26°C/19°C, 5% rain', delay: 200, class: 'demo-result' },
+            { text: '   Jun 3: Moderate rain, 22°C/17°C, 75% rain ← Indoor day!', delay: 200, class: 'demo-price' },
+            { text: '   [OK] Weather agent completed', delay: 500, class: 'demo-success' },
+            { text: '', delay: 300 },
+            { text: '✈️ [FLIGHT AGENT] Searching flights LAX → NRT...', delay: 800, class: 'demo-agent' },
+            { text: '   Option 1: ANA NH804 - $687 nonstop, 11h 30m', delay: 300, class: 'demo-result' },
+            { text: '   Option 2: United UA7954 - $723, 1 stop, 14h 15m', delay: 200, class: 'demo-result' },
+            { text: '   Option 3: Singapore SQ11 - $812 nonstop, 10h 45m', delay: 200, class: 'demo-result' },
+            { text: '   Book: https://google.com/travel/flights?q=LAX+to+NRT', delay: 200, class: 'demo-link' },
+            { text: '   [OK] Flight agent completed', delay: 500, class: 'demo-success' },
+            { text: '', delay: 300 },
+            { text: '🏨 [HOTEL AGENT] Searching hotels in Tokyo...', delay: 800, class: 'demo-agent' },
+            { text: '   1. Shinjuku Granbell Hotel ★★★★ - $118/night ($708 total)', delay: 300, class: 'demo-result' },
+            { text: '   2. The Gate Hotel Asakusa ★★★★ - $132/night ($792 total)', delay: 200, class: 'demo-result' },
+            { text: '   3. Dormy Inn Akihabara ★★★ - $79/night ($474 total)', delay: 200, class: 'demo-result' },
+            { text: '   Book: https://booking.com/searchresults.html?ss=Tokyo', delay: 200, class: 'demo-link' },
+            { text: '   [OK] Hotel agent completed', delay: 500, class: 'demo-success' },
+            { text: '', delay: 300 },
+            { text: '🎯 [ACTIVITY AGENT] Finding things to do...', delay: 800, class: 'demo-agent' },
+            { text: '   FREE: Tsukiji Market, Meiji Shrine, Shibuya Crossing', delay: 300, class: 'demo-result' },
+            { text: '   PAID: TeamLab Borderless ($35), Shinjuku Gyoen ($5)', delay: 200, class: 'demo-result' },
+            { text: '   FOOD: Ramen Street ($12), Golden Gai ($20)', delay: 200, class: 'demo-price' },
+            { text: '   [OK] Activity agent completed', delay: 500, class: 'demo-success' },
+            { text: '', delay: 300 },
+            { text: '💰 [BUDGET AGENT] Optimizing allocation...', delay: 800, class: 'demo-agent' },
+            { text: '   Flights: $687 | Hotel: $708 | Food: $525 | Activities: $350', delay: 300, class: 'demo-result' },
+            { text: '   Total: $2,420 — $580 remaining! 🎉', delay: 300, class: 'demo-price' },
+            { text: '   [OK] Budget agent completed', delay: 500, class: 'demo-success' },
+            { text: '', delay: 300 },
+            { text: '📋 [ITINERARY AGENT] Compiling your perfect trip...', delay: 1200, class: 'demo-agent' },
+            { text: '   Day 1: Arrive → Shinjuku → Golden Gai evening', delay: 300, class: 'demo-result' },
+            { text: '   Day 2: Tsukiji Market → Meiji Shrine → Harajuku', delay: 200, class: 'demo-result' },
+            { text: '   Day 3: TeamLab Borderless → Akihabara (rainy day!)', delay: 200, class: 'demo-result' },
+            { text: '   Day 4: Asakusa → Senso-ji → Ueno Park', delay: 200, class: 'demo-result' },
+            { text: '   Day 5: Day trip to Kamakura / Hakone', delay: 200, class: 'demo-result' },
+            { text: '   Day 6: Shibuya → Shinjuku Gyoen → Ramen Street', delay: 200, class: 'demo-result' },
+            { text: '   Day 7: Last shopping → Departure', delay: 200, class: 'demo-result' },
+            { text: '', delay: 300 },
+            { text: '✅ Your complete itinerary is ready! Saved to itinerary_tokyo.md', delay: 500, class: 'demo-success' },
+        ];
+
+        let demoStarted = false;
+        const termObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !demoStarted) {
+                demoStarted = true;
+                runTerminalDemo();
+            }
+        }, { threshold: 0.3 });
+
+        termObserver.observe(document.getElementById('demo-terminal'));
+
+        async function runTerminalDemo() {
+            const terminal = document.getElementById('demo-terminal');
+            for (const line of demoLines) {
+                await new Promise(r => setTimeout(r, line.delay));
+                const div = document.createElement('div');
+                div.className = 'line';
+                if (line.class) div.classList.add(line.class);
+                div.textContent = line.text;
+                terminal.appendChild(div);
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        }
+
+        // Interactive demo
+        const agentData = {
+            "Tokyo": {
+                weather: "Partly cloudy, 22-26°C. Rain expected on Day 3 — plan indoor activities.",
+                flights: "ANA NH804: $687 nonstop (11h 30m) | United: $723 (1 stop)",
+                hotels: "Shinjuku Granbell: $118/night ★★★★ | Dormy Inn: $79/night ★★★",
+                activities: "Tsukiji Market (free), TeamLab ($35), Meiji Shrine (free), Ramen Street ($12)",
+                budget: "Total: $2,420 of $3,000 — $580 remaining!",
+                itinerary: "7-day plan: Shinjuku → Tsukiji → Akihabara → Asakusa → Day trip → Shibuya → Depart"
+            },
+            "Paris": {
+                weather: "Mostly sunny, 18-24°C. Perfect weather for outdoor exploration!",
+                flights: "Air France AF23: $520 nonstop (7h 45m) | Norwegian: $380 (1 stop)",
+                hotels: "Hotel Le Marais: $180/night ★★★★ | Hotel Emile: $110/night ★★★",
+                activities: "Louvre ($22), Eiffel Tower ($26), Montmartre (free), Seine Walk (free)",
+                budget: "Total: $2,350 of $3,000 — $650 remaining!",
+                itinerary: "7-day plan: Montmartre → Louvre → Eiffel Tower → Versailles → Le Marais → Latin Quarter → Depart"
+            },
+            "Bali": {
+                weather: "Tropical, 28-32°C. Dry season — perfect conditions!",
+                flights: "Singapore Airlines: $750 (1 stop) | AirAsia: $480 (1 stop)",
+                hotels: "The Slow Canggu: $120/night ★★★★ | Kosta Hostel: $15/night ★★",
+                activities: "Rice Terraces ($2), Uluwatu Temple ($5), Mt. Batur Trek ($35), Monkey Forest ($5)",
+                budget: "Total: $1,650 of $3,000 — $1,350 remaining!",
+                itinerary: "7-day plan: Ubud → Rice Terraces → Monkey Forest → Canggu → Uluwatu → Mt. Batur → Beach Day"
+            }
+        };
+
+        function runInteractiveDemo() {
+            const dest = document.getElementById('demo-destination').value || 'Tokyo';
+            const budget = document.getElementById('demo-budget').value || 3000;
+            const days = document.getElementById('demo-days').value || 7;
+
+            const output = document.getElementById('demo-output');
+            const steps = document.getElementById('agent-steps');
+            output.classList.add('active');
+            steps.innerHTML = '';
+
+            const data = agentData[dest] || agentData['Tokyo'];
+            const destName = agentData[dest] ? dest : dest + ' (using Tokyo-style data)';
+
+            const agents = [
+                { icon: '🌤️', name: 'Weather Agent', result: data.weather },
+                { icon: '✈️', name: 'Flight Agent', result: data.flights },
+                { icon: '🏨', name: 'Hotel Agent', result: data.hotels },
+                { icon: '🎯', name: 'Activity Agent', result: data.activities },
+                { icon: '💰', name: 'Budget Agent', result: data.budget.replace('3,000', Number(budget).toLocaleString()) },
+                { icon: '📋', name: 'Itinerary Agent', result: data.itinerary.replace('7-day', days + '-day') },
+            ];
+
+            let i = 0;
+            function addAgent() {
+                if (i >= agents.length) {
+                    const final = document.createElement('div');
+                    final.style.cssText = 'text-align: center; padding: 1.5rem; margin-top: 1rem; background: rgba(72, 187, 120, 0.1); border-radius: 12px; border: 1px solid rgba(72, 187, 120, 0.3);';
+                    final.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div><div style="color: #48bb78; font-weight: 700;">Your ${days}-day ${destName} itinerary is ready!</div><div style="color: var(--text-light); margin-top: 0.5rem; font-size: 0.85rem;">Budget: $${Number(budget).toLocaleString()} | ${days} days | All booking links included</div>`;
+                    steps.appendChild(final);
+                    return;
+                }
+
+                const agent = agents[i];
+                const step = document.createElement('div');
+                step.className = 'agent-step';
+                step.style.opacity = '0';
+                step.style.transform = 'translateX(-20px)';
+                step.innerHTML = `
+                    <span class="icon">${agent.icon}</span>
+                    <span class="name">${agent.name}</span>
+                    <span class="status">${agent.result}</span>
+                    <span class="check">✓</span>
+                `;
+                steps.appendChild(step);
+
+                requestAnimationFrame(() => {
+                    step.style.transition = 'all 0.5s ease';
+                    step.style.opacity = '1';
+                    step.style.transform = 'translateX(0)';
+                });
+
+                i++;
+                setTimeout(addAgent, 600);
+            }
+
+            addAgent();
+        }
+    </script>
+</body>
+</html>
