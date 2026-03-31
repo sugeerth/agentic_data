@@ -421,8 +421,9 @@ with tab4:
     st.markdown("""
     #### LangGraph State Machine
 
-    VoyageAI uses LangGraph's `StateGraph` to orchestrate agent execution. The state flows through
-    a series of conditional edges, with each agent reading from and writing to shared state.
+    VoyageAI uses LangGraph's `StateGraph` to orchestrate agent execution. Each data-gathering agent
+    calls tools **directly** (no LLM needed - fast and free). Only the final Itinerary Agent uses an
+    LLM to compile results into a polished day-by-day plan.
     """)
 
     st.code("""
@@ -446,45 +447,31 @@ with tab4:
     ```
     START
       │
-      ├─ should_continue() → "weather" (not yet completed)
-      │    │
-      │    └─ Weather Agent
-      │         ├─ get_weather_forecast() → Open-Meteo API
-      │         └─ get_best_travel_months() → Climate analysis
+      ├─ Weather Agent (direct tool calls - no LLM)
+      │    ├─ get_weather_forecast() → Open-Meteo API
+      │    └─ get_best_travel_months() → Climate analysis
       │
-      ├─ should_continue() → "flight"
-      │    │
-      │    └─ Flight Agent
-      │         ├─ search_flights() → Route pricing engine
-      │         └─ compare_flight_prices() → Platform links
+      ├─ Flight Agent (direct tool calls - no LLM)
+      │    ├─ search_flights() → Route pricing engine
+      │    └─ compare_flight_prices() → Platform links
       │
-      ├─ should_continue() → "hotel"
-      │    │
-      │    └─ Hotel Agent
-      │         ├─ search_hotels() → Hotel database
-      │         └─ compare_hotel_prices() → Booking platform links
+      ├─ Hotel Agent (direct tool calls - no LLM)
+      │    └─ search_hotels() → Hotel database
       │
-      ├─ should_continue() → "activity"
-      │    │
-      │    └─ Activity Agent
-      │         ├─ search_activities() → Curated database
-      │         └─ get_restaurant_recommendations() → Search links
+      ├─ Activity Agent (direct tool calls - no LLM)
+      │    ├─ search_activities() → Curated database
+      │    └─ get_restaurant_recommendations() → Search links
       │
-      ├─ should_continue() → "budget"
-      │    │
-      │    └─ Budget Agent
-      │         ├─ calculate_trip_budget() → Cost modeling
-      │         ├─ optimize_budget() → Allocation engine
-      │         └─ get_currency_info() → Exchange data
+      ├─ Budget Agent (direct tool calls - no LLM)
+      │    ├─ calculate_trip_budget() → Cost modeling
+      │    ├─ optimize_budget() → Allocation engine
+      │    └─ get_currency_info() → Exchange data
       │
-      ├─ should_continue() → "itinerary"
-      │    │
-      │    └─ Itinerary Agent
-      │         └─ LLM compiles all reports → Day-by-day plan
+      └─ Itinerary Agent (LLM compilation)
+           └─ LLM compiles all reports → Day-by-day plan
+               (Falls back to raw data if no LLM configured)
       │
-      └─ should_continue() → "end" (all completed)
-           │
-           END → Return itinerary to user
+      END → Return itinerary to user
     ```
     """)
 

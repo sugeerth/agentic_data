@@ -407,50 +407,44 @@
             <div class="tab-content" id="tab-arch">
                 <div class="section-header reveal">
                     <h2>Multi-Agent Architecture</h2>
-                    <p>LangGraph-powered supervisor pattern with conditional routing and shared state</p>
+                    <p>LangGraph-powered sequential pipeline — direct tool calls for speed, LLM only for final compilation</p>
                 </div>
 
                 <div class="arch-diagram reveal">
                     <div class="flow-row">
-                        <div class="flow-node supervisor">
-                            Supervisor
-                            <div class="sub">Orchestrates all agents</div>
-                        </div>
-                    </div>
-                    <div class="flow-arrow">|</div>
-                    <div class="flow-row">
                         <div class="flow-node" style="border-color: var(--yellow);">
                             🌤️ Weather
-                            <div class="sub">Open-Meteo API (free)</div>
+                            <div class="sub">Direct tool call — Open-Meteo API (free)</div>
                         </div>
                     </div>
                     <div class="flow-arrow">|</div>
                     <div class="flow-row">
                         <div class="flow-node">
                             ✈️ Flight
-                            <div class="sub">Route pricing engine</div>
+                            <div class="sub">Direct tool call — route pricing</div>
                         </div>
                         <div class="flow-node">
                             🏨 Hotel
-                            <div class="sub">30+ city database</div>
+                            <div class="sub">Direct tool call — 30+ cities</div>
                         </div>
                         <div class="flow-node">
                             🎯 Activity
-                            <div class="sub">Curated experiences</div>
+                            <div class="sub">Direct tool call — curated DB</div>
                         </div>
                     </div>
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--text-light); margin: 0.5rem 0;">No LLM needed — instant, free, reliable</div>
                     <div class="flow-arrow">|</div>
                     <div class="flow-row">
                         <div class="flow-node" style="border-color: var(--accent);">
                             💰 Budget
-                            <div class="sub">Cost optimization</div>
+                            <div class="sub">Direct tool call — cost optimization</div>
                         </div>
                     </div>
                     <div class="flow-arrow">|</div>
                     <div class="flow-row">
                         <div class="flow-node final">
                             📋 Itinerary
-                            <div class="sub">LLM compilation</div>
+                            <div class="sub">LLM compilation (Groq/Gemini free) — with no-LLM fallback</div>
                         </div>
                     </div>
                 </div>
@@ -458,14 +452,14 @@
                 <div style="margin-top: 3rem;" class="reveal">
                     <h3 style="text-align: center; color: var(--text-bright); margin-bottom: 1.5rem;">State Machine Flow</h3>
                     <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-light); line-height: 2; max-width: 700px; margin: 0 auto;">
-<span style="color: var(--yellow);">START</span> → should_continue() checks completed agents
-  ├─ <span style="color: var(--green);">weather</span> not done → run Weather Agent → tools: get_weather_forecast, get_best_travel_months
-  ├─ <span style="color: var(--primary);">flight</span> not done → run Flight Agent → tools: search_flights, compare_flight_prices
-  ├─ <span style="color: var(--primary);">hotel</span> not done → run Hotel Agent → tools: search_hotels, compare_hotel_prices
-  ├─ <span style="color: var(--primary);">activity</span> not done → run Activity Agent → tools: search_activities, get_restaurant_recommendations
-  ├─ <span style="color: var(--accent);">budget</span> not done → run Budget Agent → tools: calculate_budget, optimize_budget, get_currency_info
-  ├─ <span style="color: var(--green);">itinerary</span> not done → run Itinerary Agent → LLM compiles all data
-  └─ all done → <span style="color: var(--green);">END</span> → return itinerary
+<span style="color: var(--yellow);">START</span> → Sequential pipeline (no conditional routing needed)
+  ├─ <span style="color: var(--green);">weather_agent</span> → direct call: get_weather_forecast + get_best_travel_months (no LLM)
+  ├─ <span style="color: var(--primary);">flight_agent</span>  → direct call: search_flights + compare_flight_prices (no LLM)
+  ├─ <span style="color: var(--primary);">hotel_agent</span>   → direct call: search_hotels (no LLM)
+  ├─ <span style="color: var(--primary);">activity_agent</span> → direct call: search_activities + get_restaurant_recommendations (no LLM)
+  ├─ <span style="color: var(--accent);">budget_agent</span>  → direct call: calculate_budget + optimize_budget + get_currency_info (no LLM)
+  ├─ <span style="color: var(--green);">itinerary_agent</span> → LLM compiles all data (or no-LLM fallback)
+  └─ <span style="color: var(--green);">END</span> → return itinerary
 
 <span style="color: var(--yellow);">Shared State (AgentState)</span>:
   messages[]     ← append-only chat history
@@ -616,15 +610,10 @@
             body.innerHTML = '';
 
             const agents = [
-                { name: 'Supervisor', icon: '🎯', steps: [
-                    { type: 'think', text: `Received: Plan trip to ${dest}` },
-                    { type: 'think', text: 'Determining execution order...' },
-                    { type: 'result', text: 'Order: Weather → Flight → Hotel → Activity → Budget → Itinerary' },
-                ]},
                 { name: 'Weather Agent', icon: '🌤️', steps: [
-                    { type: 'think', text: `Looking up coordinates for ${dest}...` },
+                    { type: 'think', text: `Direct tool call — looking up coordinates for ${dest}...` },
                     { type: 'tool', text: `get_weather_forecast(city="${dest}", start_date="2025-07-01", end_date="2025-07-07")` },
-                    { type: 'result', text: '7-day forecast retrieved from Open-Meteo API' },
+                    { type: 'result', text: '7-day forecast retrieved from Open-Meteo API (no LLM used)' },
                     { type: 'tool', text: `get_best_travel_months(city="${dest}")` },
                     { type: 'result', text: 'Best travel seasons identified' },
                 ]},
@@ -657,9 +646,9 @@
                     { type: 'result', text: 'Exchange rates and tips ready' },
                 ]},
                 { name: 'Itinerary Agent', icon: '📋', steps: [
-                    { type: 'think', text: 'Compiling all agent data into itinerary...' },
-                    { type: 'tool', text: 'LLM.invoke(weather + flights + hotels + activities + budget)' },
-                    { type: 'result', text: 'Day-by-day itinerary compiled with weather-aware scheduling!' },
+                    { type: 'think', text: 'Compiling all agent data into itinerary (this is the only LLM call)...' },
+                    { type: 'tool', text: 'LLM.invoke(weather + flights + hotels + activities + budget) — via free Groq/Gemini' },
+                    { type: 'result', text: 'Day-by-day itinerary compiled with weather-aware scheduling! (or fallback if no LLM)' },
                 ]},
             ];
 

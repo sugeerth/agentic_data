@@ -108,8 +108,12 @@ Examples:
         sys.exit(1)
     except Exception as e:
         print(f"\nError: {e}")
-        print("\nMake sure your OPENAI_API_KEY is set:")
-        print("  export OPENAI_API_KEY=your_key_here")
+        print("\nSetup (choose one free option):")
+        print("  Groq (free, recommended): export LLM_PROVIDER=groq && export GROQ_API_KEY=your_key")
+        print("    Get key: https://console.groq.com")
+        print("  Google (free): export LLM_PROVIDER=google && export GOOGLE_API_KEY=your_key")
+        print("    Get key: https://aistudio.google.com")
+        print("  No API key? The app still works - you'll get raw data without a polished itinerary.")
         sys.exit(1)
 
 

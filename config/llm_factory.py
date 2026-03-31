@@ -53,6 +53,8 @@ def _create_groq_llm(temperature: float) -> BaseChatModel:
         model=GROQ_MODEL,
         temperature=temperature,
         api_key=GROQ_API_KEY,
+        max_retries=2,
+        timeout=30,
     )
 
 
@@ -68,6 +70,8 @@ def _create_google_llm(temperature: float) -> BaseChatModel:
         model=GOOGLE_MODEL,
         temperature=temperature,
         google_api_key=GOOGLE_API_KEY,
+        max_retries=2,
+        timeout=30,
     )
 
 

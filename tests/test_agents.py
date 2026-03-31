@@ -149,5 +149,49 @@ class TestBudgetTools:
         assert "Currency" in result or "currency" in result
 
 
+class TestWorkflow:
+    def test_full_workflow_no_llm(self):
+        """Test full workflow produces output without any LLM configured."""
+        import os
+        # Ensure no LLM keys are set for this test
+        old_env = {k: os.environ.pop(k, None) for k in ["GROQ_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY"]}
+        try:
+            from graph.workflow import run_travel_planner
+            result = run_travel_planner(
+                destination="Tokyo",
+                origin="New York",
+                start_date="2026-05-01",
+                end_date="2026-05-08",
+                budget=3000,
+                travelers=1,
+            )
+            assert len(result) > 1000, "Itinerary should be substantial"
+            assert "Tokyo" in result
+            assert "Flight" in result or "flight" in result
+            assert "Hotel" in result or "hotel" in result
+        finally:
+            for k, v in old_env.items():
+                if v is not None:
+                    os.environ[k] = v
+
+    def test_workflow_callback(self):
+        """Test that workflow fires callbacks for each agent."""
+        from graph.workflow import run_travel_planner
+        agents_seen = []
+
+        def cb(name, status, msg):
+            agents_seen.append(name)
+
+        run_travel_planner(
+            destination="Paris",
+            origin="London",
+            start_date="2026-06-01",
+            end_date="2026-06-05",
+            budget=2000,
+            callback=cb,
+        )
+        assert len(agents_seen) >= 6, f"Should see 6 agents, got {len(agents_seen)}: {agents_seen}"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

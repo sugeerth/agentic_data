@@ -338,6 +338,79 @@
         .agent-step .status { color: var(--text-light); flex: 1; }
         .agent-step .check { color: #48bb78; font-size: 1.2rem; }
 
+        /* Itinerary rendering */
+        .itinerary-render {
+            margin-top: 1.5rem; text-align: left;
+            animation: fadeSlideUp 0.6s ease;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .itin-header {
+            background: var(--gradient); border-radius: 16px 16px 0 0;
+            padding: 2rem 2.5rem; color: white;
+        }
+        .itin-header h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.3rem; }
+        .itin-header .meta { opacity: 0.85; font-size: 0.95rem; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .itin-body {
+            background: var(--bg-card); border: 1px solid var(--border); border-top: none;
+            border-radius: 0 0 16px 16px; padding: 0;
+        }
+        .itin-day {
+            padding: 1.8rem 2.5rem; border-bottom: 1px solid var(--border);
+            transition: background 0.3s;
+        }
+        .itin-day:last-child { border-bottom: none; }
+        .itin-day:hover { background: rgba(102, 126, 234, 0.04); }
+        .itin-day-header {
+            display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
+        }
+        .itin-day-num {
+            background: var(--gradient); color: white; font-weight: 800;
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; flex-shrink: 0;
+        }
+        .itin-day-title { font-weight: 700; color: var(--text-bright); font-size: 1.1rem; }
+        .itin-day-weather { font-size: 0.85rem; color: var(--text-light); }
+        .itin-activities { display: flex; flex-direction: column; gap: 0.6rem; padding-left: 3.5rem; }
+        .itin-slot {
+            display: flex; gap: 0.8rem; align-items: flex-start; font-size: 0.9rem;
+        }
+        .itin-time {
+            color: var(--primary); font-weight: 600; min-width: 75px;
+            font-size: 0.8rem; padding-top: 0.1rem;
+        }
+        .itin-detail { color: var(--text); line-height: 1.5; }
+        .itin-detail .place { font-weight: 600; color: var(--text-bright); }
+        .itin-detail .info { color: var(--text-light); font-size: 0.85rem; }
+        .itin-link {
+            color: var(--accent); text-decoration: none; font-size: 0.8rem;
+            font-weight: 500; transition: opacity 0.2s;
+        }
+        .itin-link:hover { opacity: 0.8; text-decoration: underline; }
+        .itin-budget-bar {
+            margin: 1.5rem 2.5rem; padding: 1.2rem 1.5rem;
+            background: rgba(102,126,234,0.08); border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .itin-budget-bar h4 { color: var(--text-bright); font-size: 0.95rem; margin-bottom: 0.8rem; }
+        .budget-row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; }
+        .budget-row .cat { color: var(--text-light); }
+        .budget-row .amt { color: var(--text-bright); font-weight: 600; }
+        .budget-row.total { border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 0.6rem; }
+        .budget-row.total .cat, .budget-row.total .amt { color: #48bb78; font-weight: 700; font-size: 0.95rem; }
+        .itin-tips {
+            margin: 0 2.5rem 1.5rem; padding: 1.2rem 1.5rem;
+            background: rgba(72,187,120,0.06); border-radius: 12px;
+            border: 1px solid rgba(72,187,120,0.2);
+        }
+        .itin-tips h4 { color: #48bb78; font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .itin-tips ul { list-style: none; padding: 0; }
+        .itin-tips li { color: var(--text-light); font-size: 0.85rem; padding: 0.2rem 0; }
+        .itin-tips li::before { content: '✓ '; color: #48bb78; font-weight: 700; }
+
         /* Code section */
         .code-block {
             background: rgba(0,0,0,0.4); border: 1px solid var(--border);
@@ -426,7 +499,8 @@
                 </div>
                 <h1>Plan Your Perfect Trip<br>with <span>AI Agents</span></h1>
                 <p>VoyageAI uses 6 specialized AI agents powered by LangGraph to search flights, find hotels,
-                   discover activities, check weather, optimize budgets, and compile beautiful itineraries.</p>
+                   discover activities, check weather, optimize budgets, and compile beautiful itineraries.
+                   5 agents run instantly with zero API calls. Only the final compilation uses a free LLM.</p>
                 <div class="hero-buttons">
                     <a href="https://github.com/sugeerth/agentic_data" class="btn btn-primary">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -440,9 +514,10 @@
                     <span class="tech-badge">LangGraph</span>
                     <span class="tech-badge">LangChain</span>
                     <span class="tech-badge">Langfuse</span>
-                    <span class="tech-badge">OpenAI GPT-4</span>
+                    <span class="tech-badge">Free LLM Support</span>
                     <span class="tech-badge">Streamlit</span>
                     <span class="tech-badge">Open-Meteo API</span>
+                    <span class="tech-badge">Zero-Cost Tools</span>
                 </div>
             </div>
         </div>
@@ -509,11 +584,11 @@
                 <div class="agent-card reveal">
                     <span class="agent-icon">📋</span>
                     <h3>Itinerary Agent</h3>
-                    <p>Compiles all agent results into a comprehensive day-by-day travel plan with weather-aware scheduling, booking links, and budget tracking.</p>
+                    <p>Uses an LLM to compile all agent results into a comprehensive day-by-day travel plan with weather-aware scheduling, booking links, and budget tracking. Falls back to structured output if no LLM is configured.</p>
                     <div class="agent-tools">
-                        <span class="tool-tag">Schedule Optimizer</span>
-                        <span class="tool-tag">Conflict Resolution</span>
-                        <span class="tool-tag">PDF Export</span>
+                        <span class="tool-tag">LLM Compilation</span>
+                        <span class="tool-tag">No-LLM Fallback</span>
+                        <span class="tool-tag">Day-by-Day Plan</span>
                     </div>
                 </div>
             </div>
@@ -525,42 +600,40 @@
         <div class="container">
             <div class="section-header reveal">
                 <h2>Multi-Agent Architecture</h2>
-                <p>A LangGraph-powered supervisor pattern with conditional routing and shared state management.</p>
+                <p>LangGraph-powered sequential pipeline. 5 agents call tools directly (no LLM, instant). Only the final agent uses an LLM.</p>
             </div>
             <div class="architecture reveal">
                 <div class="arch-flow">
-                    <div class="arch-node supervisor">Supervisor (Orchestrator)</div>
-                    <div class="arch-arrow">&#8595;</div>
-                    <div class="arch-node">Weather Agent (First - informs all others)</div>
+                    <div class="arch-node" style="border-color: #ecc94b;">Weather Agent <span style="font-size: 0.75rem; opacity: 0.7;">(direct tools - no LLM)</span></div>
                     <div class="arch-arrow">&#8595;</div>
                     <div class="arch-parallel">
                         <div class="arch-node">Flight Agent</div>
                         <div class="arch-node">Hotel Agent</div>
                         <div class="arch-node">Activity Agent</div>
                     </div>
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--text-light); margin: 0.3rem 0;">All use direct tool calls — zero LLM cost, instant results</div>
                     <div class="arch-arrow">&#8595;</div>
-                    <div class="arch-node">Budget Agent (needs flight/hotel prices)</div>
+                    <div class="arch-node" style="border-color: #f093fb;">Budget Agent <span style="font-size: 0.75rem; opacity: 0.7;">(uses flight/hotel data)</span></div>
                     <div class="arch-arrow">&#8595;</div>
-                    <div class="arch-node final">Itinerary Agent (Final Compilation)</div>
+                    <div class="arch-node final">Itinerary Agent <span style="font-size: 0.75rem; opacity: 0.7;">(LLM compilation — free via Groq/Gemini)</span></div>
                 </div>
             </div>
 
             <div class="code-block reveal" style="max-width: 900px; margin: 2rem auto;">
-                <span class="comment"># LangGraph Workflow Definition</span><br>
+                <span class="comment"># LangGraph Workflow — Direct tool calls (no LLM for data agents)</span><br>
                 <span class="keyword">from</span> langgraph.graph <span class="keyword">import</span> StateGraph, END<br><br>
-                workflow = StateGraph(<span class="func">AgentState</span>)<br>
-                workflow.<span class="func">add_node</span>(<span class="string">"weather"</span>, weather_agent)<br>
-                workflow.<span class="func">add_node</span>(<span class="string">"flight"</span>, flight_agent)<br>
-                workflow.<span class="func">add_node</span>(<span class="string">"hotel"</span>, hotel_agent)<br>
-                workflow.<span class="func">add_node</span>(<span class="string">"activity"</span>, activity_agent)<br>
-                workflow.<span class="func">add_node</span>(<span class="string">"budget"</span>, budget_agent)<br>
-                workflow.<span class="func">add_node</span>(<span class="string">"itinerary"</span>, itinerary_agent)<br><br>
-                <span class="comment"># Conditional routing based on completed agents</span><br>
-                workflow.<span class="func">add_conditional_edges</span>(<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"__start__"</span>, should_continue,<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;{<span class="string">"weather"</span>: <span class="string">"weather"</span>, <span class="string">"flight"</span>: <span class="string">"flight"</span>, ...}<br>
-                )<br>
-                graph = workflow.<span class="func">compile</span>()
+                workflow = StateGraph(<span class="func">AgentState</span>)<br><br>
+                <span class="comment"># Each node calls tools directly — fast, free, reliable</span><br>
+                workflow.<span class="func">add_node</span>(<span class="string">"weather_agent"</span>, weather_node)  <span class="comment"># calls get_weather_forecast directly</span><br>
+                workflow.<span class="func">add_node</span>(<span class="string">"flight_agent"</span>, flight_node)    <span class="comment"># calls search_flights directly</span><br>
+                workflow.<span class="func">add_node</span>(<span class="string">"hotel_agent"</span>, hotel_node)      <span class="comment"># calls search_hotels directly</span><br>
+                workflow.<span class="func">add_node</span>(<span class="string">"activity_agent"</span>, activity_node)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"budget_agent"</span>, budget_node)<br>
+                workflow.<span class="func">add_node</span>(<span class="string">"itinerary_agent"</span>, compile_itinerary_node)  <span class="comment"># only this uses LLM</span><br><br>
+                <span class="comment"># Sequential pipeline</span><br>
+                workflow.<span class="func">add_edge</span>(<span class="string">"__start__"</span>, <span class="string">"weather_agent"</span>)<br>
+                workflow.<span class="func">add_edge</span>(<span class="string">"weather_agent"</span>, <span class="string">"flight_agent"</span>)<br>
+                <span class="comment"># ... weather → flight → hotel → activity → budget → itinerary → END</span>
             </div>
         </div>
     </section>
@@ -588,19 +661,24 @@
             <!-- Interactive Demo -->
             <div class="interactive-demo reveal">
                 <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text-bright);">Try It Yourself</h3>
-                <p style="color: var(--text-light); margin-bottom: 1.5rem;">Enter a destination to see the agent workflow in action</p>
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">Pick a destination and watch 6 AI agents build your itinerary</p>
 
                 <div class="demo-input-group">
-                    <input type="text" class="demo-input" id="demo-destination" placeholder="Destination (e.g., Paris)" value="Tokyo">
+                    <select class="demo-input" id="demo-destination" style="min-width: 160px;">
+                        <option value="Tokyo">Tokyo</option>
+                        <option value="Paris">Paris</option>
+                        <option value="Bali">Bali</option>
+                    </select>
                     <input type="number" class="demo-input" id="demo-budget" placeholder="Budget ($)" value="3000" style="max-width: 150px;">
                     <input type="number" class="demo-input" id="demo-days" placeholder="Days" value="7" style="max-width: 100px;">
-                    <button class="btn btn-primary" onclick="runInteractiveDemo()" style="border: none; cursor: pointer;">
+                    <button class="btn btn-primary" id="plan-btn" onclick="runInteractiveDemo()" style="border: none; cursor: pointer;">
                         Plan Trip
                     </button>
                 </div>
 
                 <div class="demo-output" id="demo-output">
                     <div id="agent-steps"></div>
+                    <div id="itinerary-container"></div>
                 </div>
             </div>
         </div>
@@ -627,12 +705,12 @@
                 <div class="feature-card reveal">
                     <div class="feature-icon">🤖</div>
                     <h3>True Multi-Agent</h3>
-                    <p>Not a single prompt — 6 specialized agents with their own tools, prompts, and reasoning, orchestrated by LangGraph.</p>
+                    <p>6 specialized agents with direct tool calls. 5 run instantly without LLM. Only itinerary compilation uses a free LLM.</p>
                 </div>
                 <div class="feature-card reveal">
-                    <div class="feature-icon">📊</div>
-                    <h3>Langfuse Observability</h3>
-                    <p>Full tracing of every agent interaction, tool call, and decision for debugging and optimization.</p>
+                    <div class="feature-icon">🆓</div>
+                    <h3>100% Free to Run</h3>
+                    <p>Works with free LLM providers (Groq, Google Gemini). Even produces results with zero API keys via fallback mode.</p>
                 </div>
                 <div class="feature-card reveal">
                     <div class="feature-icon">💸</div>
@@ -652,7 +730,7 @@
                 <div class="feature-card reveal">
                     <div class="feature-icon">🔓</div>
                     <h3>100% Open Source</h3>
-                    <p>MIT licensed. Fork it, customize it, deploy it. Bring your own LLM — works with any OpenAI-compatible API.</p>
+                    <p>MIT licensed. Fork it, customize it, deploy it. Supports Groq (free), Google Gemini (free), and OpenAI.</p>
                 </div>
             </div>
         </div>
@@ -669,11 +747,15 @@
                 git clone https://github.com/sugeerth/agentic_data.git<br>
                 cd agentic_data<br>
                 pip install -r requirements.txt<br><br>
-                <span class="comment"># Set your API key</span><br>
-                export OPENAI_API_KEY=your_key_here<br><br>
+                <span class="comment"># Set up a FREE LLM (choose one)</span><br>
+                export LLM_PROVIDER=groq<br>
+                export GROQ_API_KEY=your_free_key  <span class="comment"># Get at console.groq.com</span><br><br>
+                <span class="comment"># Or use Google Gemini (also free)</span><br>
+                <span class="comment"># export LLM_PROVIDER=google</span><br>
+                <span class="comment"># export GOOGLE_API_KEY=your_free_key  # Get at aistudio.google.com</span><br><br>
                 <span class="comment"># Launch the beautiful UI</span><br>
                 streamlit run app.py<br><br>
-                <span class="comment"># Or use the CLI</span><br>
+                <span class="comment"># Or use the CLI (works even without API keys!)</span><br>
                 python3 main.py -d "Tokyo" -b 3000 --dates "2025-06-01 to 2025-06-07"
             </div>
         </div>
@@ -796,32 +878,171 @@
             }
         }
 
-        // Interactive demo
-        const agentData = {
+        // Interactive demo with full itinerary rendering
+        const tripData = {
             "Tokyo": {
-                weather: "Partly cloudy, 22-26°C. Rain expected on Day 3 — plan indoor activities.",
-                flights: "ANA NH804: $687 nonstop (11h 30m) | United: $723 (1 stop)",
-                hotels: "Shinjuku Granbell: $118/night ★★★★ | Dormy Inn: $79/night ★★★",
-                activities: "Tsukiji Market (free), TeamLab ($35), Meiji Shrine (free), Ramen Street ($12)",
-                budget: "Total: $2,420 of $3,000 — $580 remaining!",
-                itinerary: "7-day plan: Shinjuku → Tsukiji → Akihabara → Asakusa → Day trip → Shibuya → Depart"
+                flight: { airline: "ANA", code: "NH804", price: 687, duration: "13h 30m", stops: "Nonstop", route: "JFK → NRT" },
+                hotel: { name: "Shinjuku Granbell Hotel", stars: 4, price: 118, area: "Shinjuku" },
+                budgetBreakdown: { flights: 687, hotel: 826, food: 368, activities: 263, transport: 158, misc: 105 },
+                weather: ["Partly cloudy 24°C", "Clear sky 26°C", "Rain 22°C", "Mostly clear 25°C", "Partly cloudy 27°C", "Clear sky 28°C", "Mostly clear 25°C"],
+                days: [
+                    { title: "Arrival & Shinjuku", slots: [
+                        { time: "Afternoon", place: "Arrive at Narita (NRT)", info: "Take Narita Express to Shinjuku (~90 min, $30)" },
+                        { time: "4:00 PM", place: "Check in at Shinjuku Granbell Hotel", info: "Drop bags, freshen up", link: "https://www.booking.com/searchresults.html?ss=Shinjuku+Granbell" },
+                        { time: "6:00 PM", place: "Shinjuku Gyoen National Garden", info: "Beautiful evening stroll through Japanese gardens — $5", link: "https://www.google.com/travel/things-to-do?q=Shinjuku+Gyoen" },
+                        { time: "8:00 PM", place: "Golden Gai Bar Hopping", info: "Tiny themed bars in narrow alleys — budget ~$20", link: "https://www.google.com/maps/search/Golden+Gai+Shinjuku" },
+                    ]},
+                    { title: "Tsukiji & Harajuku", slots: [
+                        { time: "7:00 AM", place: "Tsukiji Outer Market Food Tour", info: "Fresh sushi, tamagoyaki, street food — FREE to walk, ~$15 for food", link: "https://www.google.com/maps/search/Tsukiji+Outer+Market" },
+                        { time: "10:00 AM", place: "Meiji Shrine", info: "Serene Shinto shrine in a 170-acre forest — FREE", link: "https://www.google.com/travel/things-to-do?q=Meiji+Shrine+Tokyo" },
+                        { time: "12:30 PM", place: "Harajuku & Takeshita Street", info: "Iconic fashion district, crepes, and people-watching — FREE" },
+                        { time: "3:00 PM", place: "Shibuya Crossing & Hachiko", info: "World's busiest crossing — FREE" },
+                        { time: "7:00 PM", place: "Ramen Street (Tokyo Station)", info: "Eight of Japan's best ramen shops — ~$12", link: "https://www.google.com/maps/search/Ramen+Street+Tokyo+Station" },
+                    ]},
+                    { title: "Indoor Day (Rain Expected)", slots: [
+                        { time: "10:00 AM", place: "TeamLab Borderless", info: "Immersive digital art museum — $35 (book ahead!)", link: "https://www.google.com/travel/things-to-do?q=TeamLab+Borderless+Tokyo" },
+                        { time: "1:00 PM", place: "Akihabara Electric Town", info: "Electronics, anime, manga paradise — FREE to explore", link: "https://www.google.com/maps/search/Akihabara+Tokyo" },
+                        { time: "4:00 PM", place: "Maid Cafe or Game Center", info: "Quintessential Tokyo weirdness — ~$15" },
+                        { time: "7:00 PM", place: "Ichiran Ramen", info: "Solo booth ramen experience — ~$12" },
+                    ]},
+                    { title: "Asakusa & Ueno", slots: [
+                        { time: "8:00 AM", place: "Senso-ji Temple & Nakamise", info: "Tokyo's oldest temple + shopping street — FREE", link: "https://www.google.com/travel/things-to-do?q=Senso-ji+Temple" },
+                        { time: "11:00 AM", place: "Ueno Park & Museums", info: "National Museum, zoo, and beautiful gardens — park FREE" },
+                        { time: "2:00 PM", place: "Yanaka Old Town", info: "Charming traditional neighborhood — FREE walking" },
+                        { time: "6:00 PM", place: "Asakusa evening walk", info: "Senso-ji lit up at night is magical — FREE" },
+                    ]},
+                    { title: "Day Trip: Kamakura", slots: [
+                        { time: "8:00 AM", place: "Train to Kamakura", info: "JR Yokosuka Line from Tokyo (~1 hr, covered by JR Pass)" },
+                        { time: "10:00 AM", place: "Great Buddha (Kotoku-in)", info: "Iconic 13m bronze statue — $3" },
+                        { time: "12:00 PM", place: "Komachi Street lunch", info: "Seafood and local specialties — ~$15" },
+                        { time: "2:00 PM", place: "Hokokuji Bamboo Temple", info: "Stunning bamboo grove with matcha — $5" },
+                        { time: "5:00 PM", place: "Return to Tokyo", info: "Rest at hotel before evening plans" },
+                    ]},
+                    { title: "Shibuya & Shopping", slots: [
+                        { time: "9:00 AM", place: "Shinjuku Gyoen Morning Walk", info: "Japanese, French, and English garden sections — $5" },
+                        { time: "12:00 PM", place: "Shibuya lunch & shopping", info: "Shibuya 109, Center Gai — budget varies" },
+                        { time: "3:00 PM", place: "Shimokitazawa", info: "Tokyo's coolest vintage/thrift neighborhood — FREE to explore" },
+                        { time: "7:00 PM", place: "Robot Restaurant Show", info: "Wild neon-lit cabaret — $60 (worth it!)", link: "https://www.google.com/search?q=Robot+Restaurant+Shinjuku" },
+                    ]},
+                    { title: "Last Day & Departure", slots: [
+                        { time: "8:00 AM", place: "Last-minute shopping at Don Quijote", info: "Tax-free souvenirs — budget varies" },
+                        { time: "10:00 AM", place: "Convenience store breakfast", info: "Onigiri + coffee — Japan's best-kept secret (~$5)" },
+                        { time: "12:00 PM", place: "Head to Narita Airport", info: "Narita Express from Shinjuku (~90 min)" },
+                        { time: "3:00 PM", place: "Depart Tokyo", info: "Sayonara! Until next time." },
+                    ]},
+                ],
+                tips: ["Get a Suica/Pasmo card for all transit", "7-Eleven ATMs accept foreign cards", "Tipping is NOT customary in Japan", "Download Google Translate with Japanese offline pack", "Carry cash — many small shops don't accept cards"],
             },
             "Paris": {
-                weather: "Mostly sunny, 18-24°C. Perfect weather for outdoor exploration!",
-                flights: "Air France AF23: $520 nonstop (7h 45m) | Norwegian: $380 (1 stop)",
-                hotels: "Hotel Le Marais: $180/night ★★★★ | Hotel Emile: $110/night ★★★",
-                activities: "Louvre ($22), Eiffel Tower ($26), Montmartre (free), Seine Walk (free)",
-                budget: "Total: $2,350 of $3,000 — $650 remaining!",
-                itinerary: "7-day plan: Montmartre → Louvre → Eiffel Tower → Versailles → Le Marais → Latin Quarter → Depart"
+                flight: { airline: "Air France", code: "AF23", price: 520, duration: "7h 45m", stops: "Nonstop", route: "JFK → CDG" },
+                hotel: { name: "Hotel Le Marais", stars: 4, price: 180, area: "Le Marais" },
+                budgetBreakdown: { flights: 520, hotel: 1260, food: 490, activities: 350, transport: 175, misc: 105 },
+                weather: ["Mostly sunny 22°C", "Clear sky 24°C", "Partly cloudy 21°C", "Sunny 23°C", "Clear 25°C", "Light clouds 22°C", "Sunny 24°C"],
+                days: [
+                    { title: "Arrival & Montmartre", slots: [
+                        { time: "Afternoon", place: "Arrive at CDG Airport", info: "RER B train to central Paris (~45 min, $12)" },
+                        { time: "4:00 PM", place: "Check in at Hotel Le Marais", info: "Charming boutique in the historic Marais district", link: "https://www.booking.com/searchresults.html?ss=Hotel+Le+Marais+Paris" },
+                        { time: "6:00 PM", place: "Montmartre & Sacre-Coeur Walk", info: "Hilltop neighborhood with street artists — FREE", link: "https://www.google.com/travel/things-to-do?q=Montmartre+Paris" },
+                        { time: "8:30 PM", place: "Dinner in Montmartre", info: "Classic French bistro — ~$35" },
+                    ]},
+                    { title: "Louvre & Tuileries", slots: [
+                        { time: "9:00 AM", place: "Louvre Museum", info: "Mona Lisa, Venus de Milo — $22 (book online!)", link: "https://www.google.com/travel/things-to-do?q=Louvre+Museum" },
+                        { time: "1:00 PM", place: "Tuileries Garden lunch", info: "Pack a baguette + cheese from a bakery — ~$10" },
+                        { time: "3:00 PM", place: "Musee d'Orsay", info: "Impressionist masterpieces — $16", link: "https://www.google.com/travel/things-to-do?q=Musee+d+Orsay" },
+                        { time: "6:00 PM", place: "Seine River Walk at sunset", info: "UNESCO World Heritage riverbanks — FREE" },
+                    ]},
+                    { title: "Eiffel Tower & Left Bank", slots: [
+                        { time: "9:30 AM", place: "Eiffel Tower", info: "Book summit tickets online — $26", link: "https://www.google.com/travel/things-to-do?q=Eiffel+Tower" },
+                        { time: "12:30 PM", place: "Rue Cler market street lunch", info: "Charming food street — ~$15" },
+                        { time: "2:30 PM", place: "Rodin Museum", info: "The Thinker and beautiful gardens — $14" },
+                        { time: "5:00 PM", place: "Latin Quarter Food Tour", info: "Bakeries, cheese shops, wine bars — ~$15" },
+                    ]},
+                    { title: "Versailles Day Trip", slots: [
+                        { time: "8:30 AM", place: "RER C to Versailles", info: "~40 min from central Paris" },
+                        { time: "10:00 AM", place: "Palace of Versailles", info: "Opulent royal palace + Hall of Mirrors — $21", link: "https://www.google.com/travel/things-to-do?q=Versailles+Palace" },
+                        { time: "1:00 PM", place: "Lunch in Versailles town", info: "Cafe near the palace — ~$20" },
+                        { time: "2:30 PM", place: "Versailles Gardens", info: "Magnificent 800-hectare grounds (included)" },
+                        { time: "5:30 PM", place: "Return to Paris", info: "Evening at leisure" },
+                    ]},
+                    { title: "Le Marais & Islands", slots: [
+                        { time: "9:00 AM", place: "Le Marais Neighborhood Stroll", info: "Historic quarter with galleries and falafel — FREE", link: "https://www.google.com/maps/search/Le+Marais+Paris" },
+                        { time: "12:00 PM", place: "L'As du Fallafel", info: "Best falafel in Paris — ~$10" },
+                        { time: "2:00 PM", place: "Ile de la Cite & Notre-Dame", info: "See the cathedral reconstruction progress — FREE" },
+                        { time: "4:00 PM", place: "Shakespeare and Company bookshop", info: "Iconic English bookshop — FREE" },
+                        { time: "7:00 PM", place: "Seine dinner cruise", info: "Optional splurge — ~$70" },
+                    ]},
+                    { title: "Art & Shopping", slots: [
+                        { time: "9:00 AM", place: "Centre Pompidou", info: "Modern art in an inside-out building — $15" },
+                        { time: "12:00 PM", place: "Le Marais brunch", info: "Trendy cafes — ~$20" },
+                        { time: "2:00 PM", place: "Champs-Elysees & Arc de Triomphe", info: "Famous avenue — Arc rooftop $16" },
+                        { time: "5:00 PM", place: "Galeries Lafayette", info: "Stunning department store with free rooftop view" },
+                        { time: "8:00 PM", place: "Farewell dinner in Saint-Germain", info: "Classic French cuisine — ~$45" },
+                    ]},
+                    { title: "Last Morning & Departure", slots: [
+                        { time: "8:00 AM", place: "Fresh croissants from a local boulangerie", info: "The perfect Parisian morning — ~$5" },
+                        { time: "10:00 AM", place: "Final walk through Luxembourg Gardens", info: "Beautiful park — FREE" },
+                        { time: "12:00 PM", place: "Head to CDG Airport", info: "RER B from Chatelet (~45 min)" },
+                        { time: "3:00 PM", place: "Depart Paris", info: "Au revoir!" },
+                    ]},
+                ],
+                tips: ["Get a Navigo Easy card for metro/bus", "Museums are free on first Sundays", "Tipping is included (service compris) but round up for good service", "Most shops close Sundays", "Learn basic French: Bonjour, Merci, S'il vous plait"],
             },
             "Bali": {
-                weather: "Tropical, 28-32°C. Dry season — perfect conditions!",
-                flights: "Singapore Airlines: $750 (1 stop) | AirAsia: $480 (1 stop)",
-                hotels: "The Slow Canggu: $120/night ★★★★ | Kosta Hostel: $15/night ★★",
-                activities: "Rice Terraces ($2), Uluwatu Temple ($5), Mt. Batur Trek ($35), Monkey Forest ($5)",
-                budget: "Total: $1,650 of $3,000 — $1,350 remaining!",
-                itinerary: "7-day plan: Ubud → Rice Terraces → Monkey Forest → Canggu → Uluwatu → Mt. Batur → Beach Day"
-            }
+                flight: { airline: "Singapore Airlines", code: "SQ", price: 750, duration: "20h (1 stop SIN)", stops: "1 stop", route: "JFK → DPS" },
+                hotel: { name: "The Slow Canggu", stars: 4, price: 120, area: "Canggu" },
+                budgetBreakdown: { flights: 750, hotel: 840, food: 147, activities: 140, transport: 63, misc: 60 },
+                weather: ["Sunny 30°C", "Sunny 31°C", "Partly cloudy 29°C", "Sunny 30°C", "Clear 32°C", "Sunny 31°C", "Partly cloudy 29°C"],
+                days: [
+                    { title: "Arrival & Canggu", slots: [
+                        { time: "Afternoon", place: "Arrive at Ngurah Rai (DPS)", info: "Private transfer to Canggu (~1 hr, $15)" },
+                        { time: "4:00 PM", place: "Check in at The Slow Canggu", info: "Boutique hotel in the surf district", link: "https://www.booking.com/searchresults.html?ss=The+Slow+Canggu" },
+                        { time: "6:00 PM", place: "Sunset at Echo Beach", info: "Watch surfers and golden hour — FREE" },
+                        { time: "7:30 PM", place: "Old Man's Canggu", info: "Popular beach bar with live music — ~$10" },
+                    ]},
+                    { title: "Ubud Day", slots: [
+                        { time: "8:00 AM", place: "Drive to Ubud", info: "Scenic 1.5 hr drive through rice fields" },
+                        { time: "10:00 AM", place: "Tegallalang Rice Terraces", info: "Stunning cascading paddies with swings — $2", link: "https://www.google.com/travel/things-to-do?q=Tegallalang+Rice+Terraces" },
+                        { time: "12:30 PM", place: "Lunch at a warung in Ubud", info: "Nasi goreng or mie goreng — ~$3" },
+                        { time: "2:00 PM", place: "Ubud Monkey Forest", info: "Sacred sanctuary with 700+ monkeys — $5", link: "https://www.google.com/travel/things-to-do?q=Ubud+Monkey+Forest" },
+                        { time: "4:30 PM", place: "Ubud Art Market", info: "Handicrafts and souvenirs — bargain!" },
+                    ]},
+                    { title: "Water Temples", slots: [
+                        { time: "8:00 AM", place: "Tirta Empul Water Temple", info: "Sacred purification ritual — $3", link: "https://www.google.com/travel/things-to-do?q=Tirta+Empul+Bali" },
+                        { time: "11:00 AM", place: "Gunung Kawi Temple", info: "Ancient rock-cut shrines in a valley — $3" },
+                        { time: "1:00 PM", place: "Lunch overlooking rice terraces", info: "Restaurant with valley views — ~$8" },
+                        { time: "3:00 PM", place: "Return to Canggu / Pool time", info: "Relax at the hotel" },
+                        { time: "7:00 PM", place: "La Brisa beach club", info: "Bohemian beach vibes — ~$15" },
+                    ]},
+                    { title: "Uluwatu & South", slots: [
+                        { time: "9:00 AM", place: "Drive to Uluwatu", info: "Southern Bali's dramatic cliffs (~1.5 hrs)" },
+                        { time: "11:00 AM", place: "Uluwatu Temple", info: "Clifftop temple with ocean views — $5", link: "https://www.google.com/travel/things-to-do?q=Uluwatu+Temple+Bali" },
+                        { time: "1:00 PM", place: "Lunch at Single Fin", info: "Legendary cliff bar — ~$12" },
+                        { time: "3:00 PM", place: "Padang Padang Beach", info: "Beautiful hidden beach — FREE" },
+                        { time: "6:00 PM", place: "Kecak Fire Dance at Uluwatu", info: "Traditional performance at sunset — $10" },
+                    ]},
+                    { title: "Mt. Batur Sunrise", slots: [
+                        { time: "2:00 AM", place: "Pickup for Mt. Batur trek", info: "Active volcano sunrise trek — $35 with guide", link: "https://www.google.com/travel/things-to-do?q=Mount+Batur+Sunrise+Trek" },
+                        { time: "6:00 AM", place: "Summit sunrise", info: "Breathtaking views over the caldera" },
+                        { time: "9:00 AM", place: "Hot springs near Mt. Batur", info: "Natural volcanic hot springs — included" },
+                        { time: "12:00 PM", place: "Return to Canggu", info: "Rest — you earned it!" },
+                        { time: "5:00 PM", place: "Balinese massage", info: "1-hour traditional massage — ~$15" },
+                    ]},
+                    { title: "Seminyak Beach Day", slots: [
+                        { time: "9:00 AM", place: "Breakfast at Cafe Organic", info: "Smoothie bowls and avocado toast — ~$8" },
+                        { time: "11:00 AM", place: "Seminyak Beach Club", info: "Potato Head or Ku De Ta — entry + drink ~$15", link: "https://www.google.com/maps/search/Seminyak+Beach+Clubs" },
+                        { time: "2:00 PM", place: "Surfing lesson", info: "Beginner-friendly waves — ~$25" },
+                        { time: "5:00 PM", place: "Sunset at Tanah Lot Temple", info: "Iconic sea temple at sunset — $5" },
+                        { time: "8:00 PM", place: "Farewell seafood dinner at Jimbaran Bay", info: "Grilled fish on the beach — ~$20" },
+                    ]},
+                    { title: "Last Day & Departure", slots: [
+                        { time: "8:00 AM", place: "Breakfast at hotel", info: "Enjoy the pool one last time" },
+                        { time: "10:00 AM", place: "Last-minute shopping in Seminyak", info: "Boutiques, Bali coffee, handcrafts" },
+                        { time: "1:00 PM", place: "Transfer to airport", info: "Private car to DPS (~45 min, $10)" },
+                        { time: "4:00 PM", place: "Depart Bali", info: "Sampai jumpa! (See you again!)" },
+                    ]},
+                ],
+                tips: ["Use Grab (Southeast Asian Uber) for all transport", "Negotiate prices at markets — start at 30% of asking", "Don't touch people's heads (culturally disrespectful)", "Carry small bills — many places don't have change", "Drink bottled water only, never tap water"],
+            },
         };
 
         function runInteractiveDemo() {
@@ -830,32 +1051,32 @@
             const days = document.getElementById('demo-days').value || 7;
 
             const output = document.getElementById('demo-output');
-            const steps = document.getElementById('agent-steps');
+            const stepsEl = document.getElementById('agent-steps');
+            const itinEl = document.getElementById('itinerary-container');
             output.classList.add('active');
-            steps.innerHTML = '';
+            stepsEl.innerHTML = '';
+            itinEl.innerHTML = '';
+            document.getElementById('plan-btn').disabled = true;
 
-            const data = agentData[dest] || agentData['Tokyo'];
-            const destName = agentData[dest] ? dest : dest + ' (using Tokyo-style data)';
+            const data = tripData[dest] || tripData['Tokyo'];
+            const destName = tripData[dest] ? dest : 'Tokyo';
+            const budgetNum = Number(budget);
 
             const agents = [
-                { icon: '🌤️', name: 'Weather Agent', result: data.weather },
-                { icon: '✈️', name: 'Flight Agent', result: data.flights },
-                { icon: '🏨', name: 'Hotel Agent', result: data.hotels },
-                { icon: '🎯', name: 'Activity Agent', result: data.activities },
-                { icon: '💰', name: 'Budget Agent', result: data.budget.replace('3,000', Number(budget).toLocaleString()) },
-                { icon: '📋', name: 'Itinerary Agent', result: data.itinerary.replace('7-day', days + '-day') },
+                { icon: '🌤️', name: 'Weather Agent', result: `${data.weather[0]}, ${data.weather[1]}, ...` },
+                { icon: '✈️', name: 'Flight Agent', result: `${data.flight.airline} ${data.flight.code}: $${data.flight.price} ${data.flight.stops}` },
+                { icon: '🏨', name: 'Hotel Agent', result: `${data.hotel.name} ${'★'.repeat(data.hotel.stars)} — $${data.hotel.price}/night` },
+                { icon: '🎯', name: 'Activity Agent', result: `${data.days.length * 3}+ activities found across ${data.days.length} days` },
+                { icon: '💰', name: 'Budget Agent', result: `Total: $${Object.values(data.budgetBreakdown).reduce((a,b)=>a+b,0).toLocaleString()} of $${budgetNum.toLocaleString()}` },
+                { icon: '📋', name: 'Itinerary Agent', result: 'Compiling day-by-day plan...' },
             ];
 
             let i = 0;
             function addAgent() {
                 if (i >= agents.length) {
-                    const final = document.createElement('div');
-                    final.style.cssText = 'text-align: center; padding: 1.5rem; margin-top: 1rem; background: rgba(72, 187, 120, 0.1); border-radius: 12px; border: 1px solid rgba(72, 187, 120, 0.3);';
-                    final.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div><div style="color: #48bb78; font-weight: 700;">Your ${days}-day ${destName} itinerary is ready!</div><div style="color: var(--text-light); margin-top: 0.5rem; font-size: 0.85rem;">Budget: $${Number(budget).toLocaleString()} | ${days} days | All booking links included</div>`;
-                    steps.appendChild(final);
+                    setTimeout(() => renderItinerary(destName, data, budgetNum, days), 400);
                     return;
                 }
-
                 const agent = agents[i];
                 const step = document.createElement('div');
                 step.className = 'agent-step';
@@ -867,19 +1088,88 @@
                     <span class="status">${agent.result}</span>
                     <span class="check">✓</span>
                 `;
-                steps.appendChild(step);
-
+                stepsEl.appendChild(step);
                 requestAnimationFrame(() => {
                     step.style.transition = 'all 0.5s ease';
                     step.style.opacity = '1';
                     step.style.transform = 'translateX(0)';
                 });
-
                 i++;
-                setTimeout(addAgent, 600);
+                setTimeout(addAgent, 500);
             }
-
             addAgent();
+        }
+
+        function renderItinerary(dest, data, budget, numDays) {
+            const itinEl = document.getElementById('itinerary-container');
+            const totalSpent = Object.values(data.budgetBreakdown).reduce((a,b) => a+b, 0);
+            const remaining = budget - totalSpent;
+            const daysToShow = data.days.slice(0, Math.min(numDays, data.days.length));
+
+            let html = `
+            <div class="itinerary-render">
+                <div class="itin-header">
+                    <h2>Your ${daysToShow.length}-Day ${dest} Itinerary</h2>
+                    <div class="meta">
+                        <span>✈️ ${data.flight.route}</span>
+                        <span>🏨 ${data.hotel.name}</span>
+                        <span>💰 $${budget.toLocaleString()} budget</span>
+                    </div>
+                </div>
+                <div class="itin-body">`;
+
+            daysToShow.forEach((day, idx) => {
+                const weatherEmoji = data.weather[idx]?.includes('Rain') ? '🌧️' : data.weather[idx]?.includes('cloud') ? '⛅' : '☀️';
+                html += `
+                    <div class="itin-day">
+                        <div class="itin-day-header">
+                            <div class="itin-day-num">Day ${idx + 1}</div>
+                            <div>
+                                <div class="itin-day-title">${day.title}</div>
+                                <div class="itin-day-weather">${weatherEmoji} ${data.weather[idx] || ''}</div>
+                            </div>
+                        </div>
+                        <div class="itin-activities">`;
+                day.slots.forEach(slot => {
+                    html += `
+                            <div class="itin-slot">
+                                <div class="itin-time">${slot.time}</div>
+                                <div class="itin-detail">
+                                    <span class="place">${slot.place}</span><br>
+                                    <span class="info">${slot.info}</span>
+                                    ${slot.link ? `<br><a href="${slot.link}" target="_blank" class="itin-link">View details →</a>` : ''}
+                                </div>
+                            </div>`;
+                });
+                html += `</div></div>`;
+            });
+
+            // Budget tracker
+            html += `
+                    <div class="itin-budget-bar">
+                        <h4>💰 Budget Tracker</h4>`;
+            for (const [cat, amt] of Object.entries(data.budgetBreakdown)) {
+                html += `<div class="budget-row"><span class="cat">${cat.charAt(0).toUpperCase() + cat.slice(1)}</span><span class="amt">$${amt.toLocaleString()}</span></div>`;
+            }
+            html += `
+                        <div class="budget-row total"><span class="cat">Remaining</span><span class="amt">$${remaining.toLocaleString()} of $${budget.toLocaleString()}</span></div>
+                    </div>`;
+
+            // Tips
+            html += `
+                    <div class="itin-tips">
+                        <h4>🎒 Packing & Travel Tips</h4>
+                        <ul>`;
+            data.tips.forEach(tip => { html += `<li>${tip}</li>`; });
+            html += `</ul></div>`;
+
+            html += `</div></div>`;
+
+            itinEl.innerHTML = html;
+            document.getElementById('plan-btn').disabled = false;
+
+            // Scroll to itinerary
+            itinEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     </script>
 </body>

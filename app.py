@@ -195,18 +195,39 @@ with st.sidebar:
     )
 
     st.markdown("---")
+
+    # Show LLM provider status
+    try:
+        from config.llm_factory import get_provider_info
+        info = get_provider_info()
+        status_icon = {
+            "configured": "&#9989;",
+            "needs_api_key": "&#10060;",
+            "not_configured": "&#9888;&#65039;",
+        }.get(info["status"], "?")
+        st.markdown(f"### LLM Status {status_icon}")
+        st.markdown(f"**Provider:** {info['provider'].title()}")
+        st.markdown(f"**Model:** {info['model']}")
+        st.markdown(f"**Cost:** {info['cost']}")
+        if info["status"] == "needs_api_key":
+            st.warning(f"API key not set. Get one at {info['setup_url']}")
+        elif info["status"] == "configured":
+            st.success("Ready to generate polished itineraries!")
+    except Exception:
+        st.markdown("### LLM Status")
+        st.info("No LLM configured. Raw data mode.")
+
+    st.markdown("---")
     st.markdown("### Agent Architecture")
     st.markdown("""
     ```
-    Supervisor
-       |
     Weather --> Flight
        |         |
     Hotel --> Activity
        |
     Budget
        |
-    Itinerary
+    Itinerary (LLM)
     ```
     """)
 
@@ -366,7 +387,14 @@ if st.button("Plan My Trip", use_container_width=True):
 
     except Exception as e:
         st.error(f"Error: {str(e)}")
-        st.info("Make sure your OPENAI_API_KEY is set in the .env file. Run: `cp .env.example .env` and add your key.")
+        st.info(
+            "**Setup (choose one free option):**\n"
+            "1. **Groq (recommended, free):** Get a key at [console.groq.com](https://console.groq.com), "
+            "then set `LLM_PROVIDER=groq` and `GROQ_API_KEY=your_key` in `.env`\n"
+            "2. **Google Gemini (free):** Get a key at [aistudio.google.com](https://aistudio.google.com), "
+            "then set `LLM_PROVIDER=google` and `GOOGLE_API_KEY=your_key` in `.env`\n"
+            "3. **No API key?** The app still works - you'll get raw data without a polished itinerary."
+        )
 
 else:
     # Show the demo/placeholder
