@@ -1,14 +1,47 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.env
+*.egg-info/
+.eggs/
 venv/
 .venv/
-*.egg-info/
-dist/
-build/
-.eggs/
+env/
 .mypy_cache/
 .pytest_cache/
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+
+# OS
 .DS_Store
+
+# Logs
+*.log
+
+# ML model artifacts
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.h5
+*.onnx
+*.gguf
+checkpoints/
+wandb/
+
+# Databases / vector stores
+chroma/
+*.sqlite
+*.db
