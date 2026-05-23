@@ -107,6 +107,30 @@ class TripContext:
         s = datetime.fromisoformat(self.start_date)
         return [(s + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(self.days)]
 
+    def to_payload(self) -> dict:
+        """Serialise everything the frontend needs for visualisations."""
+        return {
+            "destination": self.destination,
+            "origin": self.origin,
+            "start": self.start_date,
+            "end": self.end_date,
+            "days": self.days,
+            "travelers": self.travelers,
+            "budget_usd": self.budget_usd,
+            "preferences": self.preferences,
+            "dest_geo": self.dest_geo,
+            "origin_geo": self.origin_geo,
+            "weather": self.weather,
+            "country": self.country,
+            "wiki": self.wiki,
+            "pois": self.pois[:80],
+            "food": self.food[:60],
+            "fx": self.fx,
+            "logistics": self.logistics,
+            "timings": {k: round(v, 3) for k, v in self.timings.items()},
+            "sources": sorted(set(self.sources)),
+        }
+
 
 # ---------------------------------------------------------------------------
 # Agent base
@@ -401,12 +425,17 @@ class WikiAgent(Agent):
         title = urllib.parse.quote(ctx.dest_geo.get("city") or ctx.destination)
         try:
             s = http_json(f"https://en.wikipedia.org/api/rest_v1/page/summary/{title}")
+            orig = (s.get("originalimage") or {}) or {}
+            thumb = (s.get("thumbnail") or {}) or {}
             ctx.wiki = {
                 "title": s.get("title", ""),
                 "extract": s.get("extract", ""),
                 "description": s.get("description", ""),
                 "page_url": (s.get("content_urls") or {}).get("desktop", {}).get("page", ""),
-                "thumbnail": (s.get("thumbnail") or {}).get("source", ""),
+                "thumbnail": thumb.get("source", ""),
+                "image": orig.get("source") or thumb.get("source", ""),
+                "image_w": orig.get("width") or thumb.get("width") or 0,
+                "image_h": orig.get("height") or thumb.get("height") or 0,
             }
         except Exception:
             ctx.wiki = {}
