@@ -3,6 +3,8 @@
 import random
 from langchain_core.tools import tool
 
+from tools.city_match import match_city
+
 # Curated real activities by city
 ACTIVITIES_DATABASE = {
     "tokyo": [
@@ -82,11 +84,7 @@ ACTIVITIES_DATABASE = {
 
 
 def _get_city_activities(destination: str) -> list[dict]:
-    dest_lower = destination.lower().strip()
-    for city_key, activities in ACTIVITIES_DATABASE.items():
-        if city_key in dest_lower or dest_lower in city_key:
-            return activities
-    return []
+    return match_city(destination, ACTIVITIES_DATABASE) or []
 
 
 @tool

@@ -3,6 +3,8 @@
 import random
 from langchain_core.tools import tool
 
+from tools.city_match import match_city
+
 # Real hotel chains and boutique hotels by city
 HOTEL_DATABASE = {
     "tokyo": [
@@ -100,14 +102,8 @@ def search_hotels(destination: str, check_in: str, check_out: str, guests: int =
         guests: Number of guests
         max_price: Maximum price per night in USD
     """
-    dest_lower = destination.lower().strip()
-
-    # Find matching city in database
-    hotels_data = None
-    for city_key, hotels in HOTEL_DATABASE.items():
-        if city_key in dest_lower or dest_lower in city_key:
-            hotels_data = hotels
-            break
+    # Find matching city in the curated database
+    hotels_data = match_city(destination, HOTEL_DATABASE)
 
     if not hotels_data:
         # Generate generic hotels for unknown cities

@@ -4,6 +4,8 @@ import json
 import urllib.request
 from langchain_core.tools import tool
 
+from tools.city_match import match_city
+
 
 # Average daily costs by city (in USD) - real data based on travel blogs and budget sites
 CITY_COSTS = {
@@ -36,13 +38,21 @@ CITY_COSTS = {
     "marrakech": {"budget": 25, "mid": 70, "luxury": 200, "currency": "MAD", "rate": 10.1},
 }
 
+# Share of the per-person daily cost assigned to each category in
+# ``calculate_trip_budget`` (hotels are billed separately per night, so they
+# are not part of this split). These sum to 0.85 by design; the remaining
+# headroom reflects that lodging is the largest line item handled elsewhere.
+DAILY_FOOD_SHARE = 0.35
+DAILY_ACTIVITIES_SHARE = 0.25
+DAILY_TRANSPORT_SHARE = 0.15
+DAILY_MISC_SHARE = 0.1
+
+# Fallback daily costs (USD) when a destination is not in CITY_COSTS.
+DEFAULT_DAILY_COSTS = {"budget": 50, "mid": 120, "luxury": 350}
+
 
 def _get_city_costs(destination: str) -> dict | None:
-    dest_lower = destination.lower().strip()
-    for city_key, costs in CITY_COSTS.items():
-        if city_key in dest_lower or dest_lower in city_key:
-            return costs
-    return None
+    return match_city(destination, CITY_COSTS)
 
 
 @tool
@@ -71,18 +81,18 @@ def calculate_trip_budget(
         currency = city_costs["currency"]
         rate = city_costs["rate"]
     else:
-        daily_cost = {"budget": 50, "mid": 120, "luxury": 350}.get(travel_style, 120)
+        daily_cost = DEFAULT_DAILY_COSTS.get(travel_style, DEFAULT_DAILY_COSTS["mid"])
         currency = "USD"
         rate = 1.0
 
     hotel_total = hotel_cost_per_night * num_days
-    food_daily = daily_cost * 0.35 * num_travelers
+    food_daily = daily_cost * DAILY_FOOD_SHARE * num_travelers
     food_total = food_daily * num_days
-    activities_daily = daily_cost * 0.25 * num_travelers
+    activities_daily = daily_cost * DAILY_ACTIVITIES_SHARE * num_travelers
     activities_total = activities_daily * num_days
-    transport_daily = daily_cost * 0.15 * num_travelers
+    transport_daily = daily_cost * DAILY_TRANSPORT_SHARE * num_travelers
     transport_total = transport_daily * num_days
-    misc_daily = daily_cost * 0.1 * num_travelers
+    misc_daily = daily_cost * DAILY_MISC_SHARE * num_travelers
     misc_total = misc_daily * num_days
 
     grand_total = flight_cost + hotel_total + food_total + activities_total + transport_total + misc_total

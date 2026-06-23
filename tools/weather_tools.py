@@ -6,6 +6,8 @@ import urllib.request
 from datetime import datetime
 from langchain_core.tools import tool
 
+from tools.city_match import match_city
+
 # Create an SSL context that doesn't verify certificates (for environments with SSL issues)
 _ssl_ctx = ssl.create_default_context()
 try:
@@ -62,11 +64,7 @@ WMO_CODES = {
 
 
 def _get_coords(city: str) -> tuple[float, float] | None:
-    city_lower = city.lower().strip()
-    for key, coords in CITY_COORDS.items():
-        if key in city_lower or city_lower in key:
-            return coords
-    return None
+    return match_city(city, CITY_COORDS)
 
 
 def _fetch_url(url: str) -> dict | None:
