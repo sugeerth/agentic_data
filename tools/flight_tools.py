@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from langchain_core.tools import tool
 
 
-# Real airline data with realistic pricing algorithms
+# Real airline names; fares are synthetic (simulated via base_multiplier + random.uniform)
 AIRLINES = {
     "domestic_us": [
         {"name": "Southwest Airlines", "code": "WN", "base_multiplier": 0.85},
@@ -153,7 +153,7 @@ def _generate_flight_times(is_long_haul: bool):
 
 @tool
 def search_flights(origin: str, destination: str, departure_date: str, return_date: str, passengers: int = 1) -> str:
-    """Search for real flight options between two cities.
+    """Generate synthetic flight options between two cities (real airline names and booking links; fares/times are simulated).
 
     Args:
         origin: Departure city name
@@ -187,7 +187,7 @@ def search_flights(origin: str, destination: str, departure_date: str, return_da
         stops = 0 if random.random() > 0.4 else (1 if random.random() > 0.3 else 2)
         dep_time, arr_time, duration = _generate_flight_times(is_long_haul)
 
-        # Generate Google Flights search link (real, working link)
+        # Google Flights search link
         google_flights_url = (
             f"https://www.google.com/travel/flights?q=flights+from+{orig_code}+to+{dest_code}"
             f"+on+{departure_date}+return+{return_date}"
