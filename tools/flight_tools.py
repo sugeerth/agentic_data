@@ -5,6 +5,8 @@ import random
 from datetime import datetime, timedelta
 from langchain_core.tools import tool
 
+from tools.city_match import match_city
+
 
 # Real airline names; fares are synthetic (simulated via base_multiplier + random.uniform)
 AIRLINES = {
@@ -94,19 +96,11 @@ AIRPORT_CODES = {
 
 
 def _get_region(city: str) -> str:
-    city_lower = city.lower().strip()
-    for key, region in CITY_REGIONS.items():
-        if key in city_lower or city_lower in key:
-            return region
-    return "north_america"
+    return match_city(city, CITY_REGIONS) or "north_america"
 
 
 def _get_airport(city: str) -> str:
-    city_lower = city.lower().strip()
-    for key, code in AIRPORT_CODES.items():
-        if key in city_lower or city_lower in key:
-            return code
-    return city[:3].upper()
+    return match_city(city, AIRPORT_CODES) or city[:3].upper()
 
 
 def _calculate_base_price(origin: str, destination: str) -> float:
@@ -172,9 +166,11 @@ def search_flights(origin: str, destination: str, departure_date: str, return_da
 
     base_price = _calculate_base_price(origin, destination)
 
-    # Select appropriate airlines
+    # Select appropriate airlines. Copy the pool before shuffling so we never
+    # mutate the module-level AIRLINES constant in place (the domestic branch
+    # is a direct reference; shuffling it corrupted shared state across calls).
     if not is_international:
-        airlines = AIRLINES["domestic_us"]
+        airlines = list(AIRLINES["domestic_us"])
     else:
         airlines = AIRLINES["international"] + AIRLINES["budget_international"]
 
