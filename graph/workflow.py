@@ -1,8 +1,7 @@
 """LangGraph workflow for the multi-agent travel planning system.
 
-Key design: Tools are called DIRECTLY (no LLM needed) for 5/6 agents.
-Only the final itinerary compilation uses an LLM call.
-This makes the system fast, reliable, and mostly free.
+Key design: Tools are called DIRECTLY (no LLM needed) for 5/6 nodes.
+Only the final itinerary compilation uses an LLM call, and that has a no-LLM fallback.
 """
 
 from __future__ import annotations
@@ -284,7 +283,7 @@ def compile_itinerary_node(state: AgentState) -> dict:
             f"- Travelers: {req['travelers']}\n"
             f"- Preferences: {req['preferences']}\n\n"
             f"Agent Reports:\n{all_outputs}\n\n"
-            f"Now compile a comprehensive, beautifully formatted day-by-day itinerary. "
+            f"Now compile a day-by-day itinerary. "
             f"Include all booking links, budget tracking, and practical tips."
         )
 
@@ -312,8 +311,8 @@ def compile_itinerary_node(state: AgentState) -> dict:
 def create_travel_workflow() -> StateGraph:
     """Create the multi-agent travel planning workflow.
 
-    Uses direct tool calls for data-gathering agents (fast, free, reliable)
-    and LLM only for final itinerary compilation.
+    Data-gathering agents call their tools directly (no LLM); only the final
+    itinerary compilation uses an LLM.
     """
     workflow = StateGraph(AgentState)
 
